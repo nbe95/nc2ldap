@@ -1,6 +1,43 @@
 #!/bin/bash
 
-# Run the LDAP server and our python exporter in parallel
-/container/tool/run &
-/nc-ldap/main.py &
-wait
+run_server() {
+    # (Re)start an LDAP server instance in background
+    killall slapd
+    slapd -h "ldap:/// ldapi:/// ldaps:///" -u openldap -g openldap -d "Stats,Stats2" &
+    sleep 2
+}
+
+reconfigure() {
+    # Customize slapd instance by running dpkg-reconfigure non-interactively
+    ORGANIZATION="$LDAP_ORGANIZATION"
+    DOMAIN="$LDAP_DOMAIN"
+    ADMIN_PW="$LDAP_ADMIN_PASSWORD"
+
+    touch ./slapd.conf
+    echo "slapd slapd/password1 password $ADMIN_PW" >> ./slapd.conf
+    echo "slapd slapd/internal/adminpw password $ADMIN_PW" >> ./slapd.conf
+    echo "slapd slapd/internal/generated_adminpw password $ADMIN_PW" >> ./slapd.conf
+    echo "slapd slapd/password2 password $ADMIN_PW" >> ./slapd.conf
+    echo "slapd slapd/unsafe_selfwrite_acl note" >> ./slapd.conf
+    echo "slapd slapd/purge_database boolean false" >> ./slapd.conf
+    echo "slapd slapd/domain string $DOMAIN" >> ./slapd.conf
+    echo "slapd slapd/ppolicy_schema_needs_update select abort installation" >> ./slapd.conf
+    echo "slapd slapd/invalid_config boolean true" >> ./slapd.conf
+    echo "slapd slapd/move_old_database boolean true" >> ./slapd.conf
+    echo "slapd slapd/backend select MDB" >> ./slapd.conf
+    echo "slapd shared/organization string $ORGANIZATION" >> ./slapd.conf
+    echo "slapd slapd/dump_database_destdir string /var/backups/slapd-VERSION" >> ./slapd.conf
+    echo "slapd slapd/no_configuration boolean false" >> ./slapd.conf
+    echo "slapd slapd/dump_database select when needed" >> ./slapd.conf
+    echo "slapd slapd/password_mismatch note" >> ./slapd.conf
+
+    debconf-set-selections ./slapd.conf
+    dpkg-reconfigure -f noninteractive slapd
+    rm ./slapd.conf
+}
+
+
+reconfigure
+run_server
+
+sleep infinity
