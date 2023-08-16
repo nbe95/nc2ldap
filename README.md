@@ -10,13 +10,7 @@ periodical basis.
 
 ```sh
 docker build -t nc2ldap .
-docker run -d --name nc2ldap \
-    -p 389:389 \
-    -p 636:636 \
-    -e LDAP_ORGANIZATION=myorganisation \
-    -e LDAP_DOMAIN=my.domain.tld \
-    -e LDAP_ADMIN_PASSWORD=secret \
-    nc2ldap
+docker run -d --name nc2ldap -p 389:389 -p 636:636 --env-file ./.env nc2ldap
 ```
 
 ## LDAP debugging
