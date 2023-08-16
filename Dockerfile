@@ -1,9 +1,18 @@
-FROM osixia/openldap:1.5.0
+FROM python:3-bullseye
 
-RUN mkdir -p /nc-ldap
-COPY src/ /nc-ldap
+RUN mkdir -p /nc2ldap
+WORKDIR /nc2ldap
 
-RUN pip install -r /nc-ldap/requirements.txt
+COPY src/ .
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python -m pip install -r ./requirements.txt
 
 COPY entrypoint.sh /
 ENTRYPOINT [ "/entrypoint.sh" ]

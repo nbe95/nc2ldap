@@ -1,2 +1,2 @@
-ldap
+python-ldap
 simple-scheduler
