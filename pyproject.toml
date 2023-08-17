@@ -1,0 +1,43 @@
+[project]
+name = "nc2ldap"
+authors = [
+  { name = "Niklas Bettgen", email="niklas@bettgen.de" }
+]
+
+description = "Generate architectural views visualizing contracting dependencies between projects."
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "ldap3",
+    "simple-scheduler"
+]
+
+[project.optional-dependencies]
+taskrunner = [
+    "tox"
+]
+lint = [
+    "nc2ldap[taskrunner]",
+    "black",
+    "flake8",
+    "mypy",
+    "pylint",
+    "isort",
+]
+
+[tool.black]
+line-length = 79
+
+[tool.pydocstyle]
+ignore = "D105,D107,D203,D213"
+
+[tool.mypy]
+python_version = 3.7
+mypy_path = "src"
+check_untyped_defs = true
+ignore_missing_imports = true
+ignore_missing_imports_per_module = true
+warn_unused_ignores = true

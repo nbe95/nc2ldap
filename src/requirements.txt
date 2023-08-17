@@ -1,2 +1,0 @@
-python-ldap
-simple-scheduler
