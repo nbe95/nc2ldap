@@ -8,6 +8,9 @@ periodical basis.
 
 ## Build and run
 
+When making changes, simply run `tox` to automatically validate and format the
+Python code.
+
 ```sh
 docker build -t nc2ldap .
 docker run -d --name nc2ldap -p 389:389 -p 636:636 --env-file ./.env nc2ldap
