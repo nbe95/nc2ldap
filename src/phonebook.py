@@ -45,5 +45,4 @@ class Phonebook:
 
     def get_contacts(self) -> Dict[str, Any]:
         """Read all contacts from the phonebook."""
-
         return {}

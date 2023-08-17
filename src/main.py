@@ -10,7 +10,7 @@ from phonebook import Phonebook
 
 
 def main():
-    """Main entry point."""
+    """Run main entry point."""
     print(f"Setting up task scheduler to run at: {env['SCHEDULE']}")
     # event_scheduler.add_job(
     #    job_name="Nextcloud contacts to LDAP export",
@@ -23,7 +23,6 @@ def main():
 
 def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
-
     print("Starting import from Nextcloud.")
 
     phonebook: Phonebook = Phonebook(env["LDAP_SERVER"], env["LDAP_PHONEBOOK"])
