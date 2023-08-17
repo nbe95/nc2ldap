@@ -1,34 +1,35 @@
 #!/usr/bin/env python3
 
-from simple_scheduler.event import event_scheduler
-import ldap
+"""Main app for Nextcloud to LDAP contact exporter."""
 
-LDAP_SERVER: str = "ldap://openldap:389"
-LDAP_USER: str = "cn=admin,dc=bettgen,dc=de"
-LDAP_PASSWORD: str = "foobar123"
-SCHEDULE: str = "*|**:**" # see https://pypi.org/project/simple-scheduler/
+from os import environ as env
+
+from phonebook import Phonebook
+
+# from simple_scheduler.event import event_scheduler
+
 
 def main():
-    print(f"Setting up task scheduler to run at: {SCHEDULE}")
-    event_scheduler.add_job(
-        job_name="Nextcloud contacts to LDAP export",
-        target=export,
-        when=SCHEDULE
-    )
-    event_scheduler.run()
+    """Main entry point."""
+    print(f"Setting up task scheduler to run at: {env['SCHEDULE']}")
+    # event_scheduler.add_job(
+    #    job_name="Nextcloud contacts to LDAP export",
+    #    target=do_import,
+    #    when=[env["SCHEDULE"]]
+    # )
+    # event_scheduler.run()
+    do_import()
 
-def export():
-    print("Starting LDAP export.")
 
-    print(f"Connecting to server at {LDAP_SERVER}.")
-    l = ldap.initialize(LDAP_SERVER)
+def do_import():
+    """Import and update all Nextcloud contacts to the local LDAP server."""
 
-    print(f"Authorizing as user {LDAP_USER}.")
-    l.simple_bind_s(LDAP_USER, LDAP_PASSWORD)
+    print("Starting import from Nextcloud.")
 
-    print(l.search_s('ou=Testing,dc=stroeder,dc=de',ldap.SCOPE_SUBTREE,'(cn=fred*)',['cn','mail']))
-
-    # 1. Running for the first time? Create LDAP phonebook if not existing
+    phonebook: Phonebook = Phonebook(env["LDAP_SERVER"], env["LDAP_PHONEBOOK"])
+    phonebook.login(env["LDAP_USER"], env["LDAP_PASSWORD"])
+    phonebook.create()
+    print(phonebook.get_contacts())
 
 
 if __name__ == "__main__":
