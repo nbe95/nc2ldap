@@ -1,17 +1,16 @@
-#!/usr/bin/env python3
-
 """Main app for Nextcloud to LDAP contact exporter."""
 
 from os import environ as env
 
-from phonebook import Phonebook
-
 # from simple_scheduler.event import event_scheduler
+from time import sleep
+
+from phonebook import Phonebook
 
 
 def main():
     """Run main entry point."""
-    print(f"Setting up task scheduler to run at: {env['SCHEDULE']}")
+    print(f"Setting up task scheduler to run at: {env['IMPORT_SCHEDULE']}")
     # event_scheduler.add_job(
     #    job_name="Nextcloud contacts to LDAP export",
     #    target=do_import,
@@ -19,6 +18,8 @@ def main():
     # )
     # event_scheduler.run()
     do_import()
+    while True:
+        sleep(1)
 
 
 def do_import():
@@ -26,7 +27,7 @@ def do_import():
     print("Starting import from Nextcloud.")
 
     phonebook: Phonebook = Phonebook(env["LDAP_SERVER"], env["LDAP_PHONEBOOK"])
-    phonebook.login(env["LDAP_USER"], env["LDAP_PASSWORD"])
+    phonebook.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
     phonebook.create()
     print(phonebook.get_contacts())
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """Module to encapsulate the logic and functions of our LDAP phonebook."""
 
 from typing import Any, Dict
