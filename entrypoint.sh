@@ -1,13 +1,13 @@
 #!/bin/bash
 
-run_server() {
+restart_server() {
     # (Re)start an LDAP server instance in background
     killall slapd
     slapd -h "ldap:/// ldapi:/// ldaps:///" -u openldap -g openldap -d "Stats,Stats2" &
     sleep 2
 }
 
-reconfigure() {
+reconfigure_slapd() {
     # Customize slapd instance by running dpkg-reconfigure non-interactively
     ORGANIZATION="$LDAP_ORGANIZATION"
     DOMAIN="$LDAP_DOMAIN"
@@ -37,7 +37,13 @@ reconfigure() {
 }
 
 
-reconfigure
-run_server
+# Run slapd reconfiguration once at runtime (!)
+init_file=/nc2ldap/.slapd_init_done
+if [ ! -e "$init_file" ]; then
+    reconfigure_slapd
+    restart_server
+    touch "$init_file"
+fi
 
-sleep infinity
+# Start main script
+/usr/bin/env python3 /nc2ldap/main.py
