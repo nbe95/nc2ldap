@@ -18,7 +18,7 @@ docker run -d --name nc2ldap -p 389:389 -p 636:636 --env-file ./.env nc2ldap
 ```sh
 docker run -d --name phpldapadmin \
     -p 6080:80 \
-    -e PHPLDAPADMIN_LDAP_HOSTS=192.168.1.40 \
+    -e PHPLDAPADMIN_LDAP_HOSTS=$(hostname -I) \
     -e PHPLDAPADMIN_HTTPS=false \
     osixia/phpldapadmin:0.9.0
 ```
