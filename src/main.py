@@ -1,5 +1,6 @@
 """Main app for Nextcloud to LDAP contact exporter."""
 
+import logging
 from os import environ as env
 
 # from simple_scheduler.event import event_scheduler
@@ -32,7 +33,9 @@ MARION = Contact(
 
 def main():
     """Run main entry point."""
-    print(f"Setting up task scheduler to run at: {env['IMPORT_SCHEDULE']}")
+    logging.info(
+        "Setting up task scheduler to run at %s.", env["IMPORT_SCHEDULE"]
+    )
     # event_scheduler.add_job(
     #    job_name="Nextcloud contacts to LDAP export",
     #    target=do_import,
@@ -46,7 +49,7 @@ def main():
 
 def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
-    print("Starting import from Nextcloud.")
+    logging.info("Starting import from Nextcloud.")
 
     phonebook: Phonebook = Phonebook(env["LDAP_SERVER"], env["LDAP_PHONEBOOK"])
     phonebook.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
@@ -55,7 +58,7 @@ def do_import():
     phonebook.add_contact(NIKLAS)
     phonebook.add_contact(MARION)
 
-    print(phonebook.get_contacts())
+    logging.debug(phonebook.get_contacts())
 
 
 if __name__ == "__main__":

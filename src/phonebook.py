@@ -1,5 +1,6 @@
 """Module to encapsulate the logic and functions of our LDAP phonebook."""
 
+import logging
 from typing import Any, Dict
 
 from ldap3 import ALL, Connection, Server
@@ -18,7 +19,7 @@ class Phonebook:
         self.phonebook: str = phonebook
         self.server: Server = Server(ldap_server, get_info=ALL)
         self.ldap: Connection
-        print(f"Connected to LDAP server {ldap_server}.")
+        logging.info("Connected to LDAP server %s.", ldap_server)
 
     def login(self, user: str, password: str) -> None:
         """Log in as a specific user in order to read and manipulate data."""
@@ -29,7 +30,7 @@ class Phonebook:
             client_strategy="SAFE_SYNC",
             auto_bind="NO_TLS",
         )
-        print(f"Authorized as user {user}.")
+        logging.info("Authorized as user %s", user)
 
     def create(self) -> None:
         """Create our phonebook as organizational unit if not existent yet."""
@@ -38,21 +39,24 @@ class Phonebook:
             self.phonebook, f"(objectclass={self.phonebook_ou})"
         )
         if status:
-            print(f"Phonebook {response[0]['dn']} is already present.")
+            logging.info("Phonebook %s is already present.", response[0]["dn"])
         else:
             self.ldap.add(self.phonebook, ["top", self.phonebook_ou])
-            print(f"Created new phonebook {self.phonebook}.")
+            logging.info("Created new phonebook %s.", self.phonebook)
 
     def get_contacts(self) -> Dict[str, Any]:
         """Read all contacts from the phonebook."""
-        return {}
+        _status, _result, response, _request = self.ldap.search(
+            self.phonebook, f"(objectclass={self.contact_ou})"
+        )
+        return response
 
     def add_contact(self, contact: Contact) -> bool:
         """Add a single contact to the phonebook."""
-        result = self.ldap.add(
+        self.ldap.add(
             f"cn={contact.get_cn()},{self.phonebook}",
             [self.contact_ou],
             contact.as_ldap_dict(),
         )
-        print(f"Added contact {contact} to phonebook.")
+        logging.info("Added contact %s to phonebook.", contact)
         return False

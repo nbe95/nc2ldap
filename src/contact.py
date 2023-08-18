@@ -57,3 +57,7 @@ class Contact:
         set_value(result, "title", self.title)
         set_value(result, "mail", self.email)
         return result
+
+    def __repr__(self) -> str:
+        """Generate a serialized representation for nice log output."""
+        return f"{self.__class__.__name__}({self.get_cn()})"
