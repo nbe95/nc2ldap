@@ -1,11 +1,15 @@
 """Module to encapsulate the logic and functions of our LDAP phonebook."""
 
 import logging
+from os import environ as env
 from typing import Any, Dict
 
 from ldap3 import ALL, Connection, Server
 
 from contact import Contact
+
+logging.basicConfig(level=logging.DEBUG if "DEBUG" in env else logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Phonebook:
@@ -19,7 +23,7 @@ class Phonebook:
         self.phonebook: str = phonebook
         self.server: Server = Server(ldap_server, get_info=ALL)
         self.ldap: Connection
-        logging.info("Connected to LDAP server %s.", ldap_server)
+        logger.info("Connected to LDAP server %s.", ldap_server)
 
     def login(self, user: str, password: str) -> None:
         """Log in as a specific user in order to read and manipulate data."""
@@ -30,7 +34,7 @@ class Phonebook:
             client_strategy="SAFE_SYNC",
             auto_bind="NO_TLS",
         )
-        logging.info("Authorized as user %s", user)
+        logger.info("Authorized as user %s", user)
 
     def create(self) -> None:
         """Create our phonebook as organizational unit if not existent yet."""
@@ -39,10 +43,10 @@ class Phonebook:
             self.phonebook, f"(objectclass={self.phonebook_ou})"
         )
         if status:
-            logging.info("Phonebook %s is already present.", response[0]["dn"])
+            logger.info("Phonebook %s is already present.", response[0]["dn"])
         else:
             self.ldap.add(self.phonebook, ["top", self.phonebook_ou])
-            logging.info("Created new phonebook %s.", self.phonebook)
+            logger.info("Created new phonebook %s.", self.phonebook)
 
     def get_contacts(self) -> Dict[str, Any]:
         """Read all contacts from the phonebook."""
@@ -58,5 +62,5 @@ class Phonebook:
             [self.contact_ou],
             contact.as_ldap_dict(),
         )
-        logging.info("Added contact %s to phonebook.", contact)
+        logger.info("Added contact %s to phonebook.", contact)
         return False

@@ -11,6 +11,9 @@ import phonenumbers
 from contact import Contact
 from phonebook import Phonebook
 
+logging.basicConfig(level=logging.DEBUG if "DEBUG" in env else logging.INFO)
+logger = logging.getLogger(__name__)
+
 NIKLAS = Contact(
     first_name="Niklas",
     last_name="Bettgen",
@@ -33,7 +36,7 @@ MARION = Contact(
 
 def main():
     """Run main entry point."""
-    logging.info(
+    logger.info(
         "Setting up task scheduler to run at %s.", env["IMPORT_SCHEDULE"]
     )
     # event_scheduler.add_job(
@@ -49,7 +52,7 @@ def main():
 
 def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
-    logging.info("Starting import from Nextcloud.")
+    logger.info("Starting import from Nextcloud.")
 
     phonebook: Phonebook = Phonebook(env["LDAP_SERVER"], env["LDAP_PHONEBOOK"])
     phonebook.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
@@ -58,7 +61,7 @@ def do_import():
     phonebook.add_contact(NIKLAS)
     phonebook.add_contact(MARION)
 
-    logging.debug(phonebook.get_contacts())
+    logger.warning(phonebook.get_contacts())
 
 
 if __name__ == "__main__":
