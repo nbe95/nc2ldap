@@ -2,9 +2,10 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Type
 
-from phonenumbers import PhoneNumber, PhoneNumberFormat, format_number
+from phonenumbers import PhoneNumber, PhoneNumberFormat, format_number, parse
+from phonenumbers.phonenumberutil import NumberParseException
 
 
 @dataclass(frozen=True)
@@ -27,7 +28,7 @@ class Contact:
         """Build a CN based on this contact's data."""
         return f"{self.first_name} {self.last_name}"
 
-    def as_ldap_dict(self) -> Dict[str, str]:
+    def to_ldap_dict(self) -> Dict[str, str]:
         """Create a data record an LDAP server can handle."""
 
         def set_value(
@@ -57,6 +58,38 @@ class Contact:
         set_value(result, "title", self.title)
         set_value(result, "mail", self.email)
         return result
+
+    @classmethod
+    def from_ldap_dict(cls, attr: Dict[str, Any]) -> "Contact":
+        """Create a contact based on data from an LDAP server."""
+
+        def get_field(
+            attr: Dict[str, Any], key: str, value_type: Type[Any] = str
+        ) -> Optional[Any]:
+            """Fetch and cast an LDAP attribute, which is usually a list."""
+            wrapper: Optional[List[Any]] = attr.get(key)
+            if wrapper is None:
+                return None
+            if value_type == PhoneNumber:
+                try:
+                    return parse(wrapper[0])
+                except NumberParseException:
+                    return None
+            return wrapper[0]
+
+        return cls(
+            get_field(attr, "givenName"),
+            get_field(attr, "sn"),
+            (get_field(attr, "street"), get_field(attr, "l")),
+            get_field(attr, "mail"),
+            get_field(attr, "o"),
+            get_field(attr, "title"),
+            get_field(attr, "homePhone", PhoneNumber),
+            get_field(attr, "mobile", PhoneNumber),
+            get_field(attr, "telephoneNumber", PhoneNumber),
+            get_field(attr, "facsimileTelephoneNumber", PhoneNumber),
+            attr.get("createTimestamp"),
+        )
 
     def __repr__(self) -> str:
         """Generate a serialized representation for nice log output."""
