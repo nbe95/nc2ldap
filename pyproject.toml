@@ -4,3 +4,6 @@ line-length=79
 [tool.mypy]
 check_untyped_defs = true
 warn_unused_ignores = true
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = "too-many-instance-attributes"
