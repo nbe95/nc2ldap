@@ -5,7 +5,29 @@ from os import environ as env
 # from simple_scheduler.event import event_scheduler
 from time import sleep
 
+import phonenumbers
+
+from contact import Contact
 from phonebook import Phonebook
+
+NIKLAS = Contact(
+    first_name="Niklas",
+    last_name="Bettgen",
+    address=("Ulrichstr. 3", "46519 Alpen"),
+    email="niklas@bettgen.de",
+    company="Bertrandt Development GmbH",
+    title="Bitschubser 1. Klasse",
+    phone_private=phonenumbers.parse("+4928029589333"),
+    phone_mobile=phonenumbers.parse("+4915170080598"),
+)
+
+MARION = Contact(
+    first_name="Marion",
+    last_name="Sadowski",
+    address=("Ulrichstr. 3", "46519 Alpen"),
+    email="marion@bettgen.de",
+    phone_private=phonenumbers.parse("+49280295893334"),
+)
 
 
 def main():
@@ -29,6 +51,10 @@ def do_import():
     phonebook: Phonebook = Phonebook(env["LDAP_SERVER"], env["LDAP_PHONEBOOK"])
     phonebook.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
     phonebook.create()
+
+    phonebook.add_contact(NIKLAS)
+    phonebook.add_contact(MARION)
+
     print(phonebook.get_contacts())
 
 

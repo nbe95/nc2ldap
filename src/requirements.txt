@@ -1,3 +1,4 @@
 ldap3
 types-ldap3
 simple-scheduler
+phonenumbers
