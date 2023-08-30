@@ -3,6 +3,7 @@
 from typing import Any, Dict
 
 import pytest
+from phonenumbers import parse
 
 from contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
 
@@ -11,8 +12,34 @@ from contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
     ("contact", "expected"),
     [
         (Contact(), {}),
+        (Contact("Noah", "Bettgen"), {"givenName": "Noah", "sn": "Bettgen"}),
+        (
+            Contact(
+                phone_private=parse("+49 5555 123"),
+                phone_mobile=parse("+49 5555 234"),
+                phone_business1=parse("+49 5555 345"),
+                phone_business2=parse("+49 5555 456"),
+            ),
+            {
+                "homePhone": "+49 5555 123",
+                "mobile": "+49 5555 234",
+                "telephoneNumber": "+49 5555 345",
+                "facsimileTelephoneNumber": "+49 5555 456",
+            },
+        ),
+        (
+            Contact(company="Black Cat & Paws Inc.", title="Verwöhnter Kater"),
+            {"o": "Black Cat & Paws Inc.", "title": "Verwöhnter Kater"},
+        ),
+        (
+            Contact(address=("Ulrichstr. 3", "46519 Alpen")),
+            {"street": "Ulrichstr. 3", "l": "46519 Alpen"},
+        ),
+        (
+            Contact(first_name="Noah", email="katze@katzenhaus.cat"),
+            {"givenName": "Noah", "mail": "katze@katzenhaus.cat"},
+        ),
     ],
-    ids=["empty"],
 )
 def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
     """Check function converting a contact object to an LDAP dict."""
@@ -20,11 +47,40 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    "data,expected",
+    ("data", "expected"),
     [
         ({}, Contact()),
+        (
+            {"givenName": ["Noah"], "sn": "Bettgen"},
+            Contact("Noah", "Bettgen"),
+        ),
+        (
+            {
+                "homePhone": ["+49 5555 123"],
+                "mobile": ["+49 5555 234"],
+                "telephoneNumber": "+49 5555 345",
+                "facsimileTelephoneNumber": "+49 5555 456",
+            },
+            Contact(
+                phone_private=parse("+49 5555 123"),
+                phone_mobile=parse("+49 5555 234"),
+                phone_business1=parse("+49 5555 345"),
+                phone_business2=parse("+49 5555 456"),
+            ),
+        ),
+        (
+            {"o": "Black Cat & Paws Inc.", "title": ["Verwöhnter Kater"]},
+            Contact(company="Black Cat & Paws Inc.", title="Verwöhnter Kater"),
+        ),
+        (
+            {"street": "Ulrichstr. 3", "l": ["46519 Alpen"]},
+            Contact(address=("Ulrichstr. 3", "46519 Alpen")),
+        ),
+        (
+            {"givenName": "Noah", "mail": ["katze@katzenhaus.cat"]},
+            Contact(first_name="Noah", email="katze@katzenhaus.cat"),
+        ),
     ],
-    ids=["empty"],
 )
 def test_ldap_to_contact(data: Dict[str, Any], expected: Contact) -> None:
     """Check function converting an LDAP dict to a contact object."""

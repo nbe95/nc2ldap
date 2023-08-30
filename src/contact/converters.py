@@ -1,6 +1,6 @@
 """Module contact conversion functions."""
 
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from phonenumbers import PhoneNumber, PhoneNumberFormat, format_number, parse
 from phonenumbers.phonenumberutil import NumberParseException
@@ -44,16 +44,22 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
     def get_field(
         attr: Dict[str, Any], key: str, value_type: Type[Any] = str
     ) -> Optional[Any]:
-        """Fetch and cast an LDAP attribute, which is usually a list."""
-        wrapper: Optional[List[Any]] = attr.get(key)
-        if wrapper is None:
+        """Fetch and cast an LDAP attribute, which might be wrapped in a list."""
+        wrapper_or_value: Optional[Union[List[Any], Any]] = attr.get(key)
+        if wrapper_or_value is None:
             return None
+
+        value: Any = (
+            wrapper_or_value
+            if not isinstance(wrapper_or_value, list)
+            else wrapper_or_value[0]
+        )
         if value_type == PhoneNumber:
             try:
-                return parse(wrapper[0])
+                return parse(value)
             except NumberParseException:
                 return None
-        return wrapper[0]
+        return value
 
     return Contact(
         get_field(data, "givenName"),
