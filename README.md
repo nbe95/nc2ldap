@@ -16,26 +16,39 @@ The easiest method is to setup a local Docker container (mind the :z-flags for
 SELinux!):
 
 ```sh
-docker run \
-    --detach \
-    --env FTP_USER=foo \
-    --env FTP_PASS=bar \
+docker run -d \
     --name my-ftp-server \
-    --publish 20-21:20-21/tcp \
-    --publish 40000-40009:40000-40009/tcp \
-    --volume /data:/home/user:z \
+    -e FTP_USER=foo \
+    -e FTP_PASS=bar \
+    -p 20-21:20-21/tcp \
+    -p 40000-40009:40000-40009/tcp \
+    -v/data:/home/user:z \
     garethflowers/ftp-server
 ```
 
 ## Build and run
 
+Always use a virtual environment instead of your system's Python interpreter.
+
+```sh
+python -m venv venv
+source venv/bin/active
+```
+
 When making changes, simply run `tox -e format` to automatically validate and
 format the Python code. Executing `tox` will ensure functionality by running all
-Pytest unit tests.
+unit tests.
+
+To build and run a Docker image, execute the following commands. Ensure you have
+populated an `.env` file with proper values (see `.env.template`).
 
 ```sh
 docker build -t nc2ldap .
-docker run -d --name nc2ldap -p 389:389 -p 636:636 --env-file ./.env nc2ldap
+docker run -d \
+    --name nc2ldap \
+    -p 389:389 \
+    -p 636:636 \
+    --env-file ./.env nc2ldap
 ```
 
 ## LDAP debugging
