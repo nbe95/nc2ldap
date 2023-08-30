@@ -6,6 +6,27 @@ It is meant to act as a simple backend for e.g. an OpenStage 40 SIP telephone.
 The plugin runs an OpenLDAP server and imports all contacts' data on a
 periodical basis.
 
+## Prerequisites
+
+In order to tell our OpenStage40 phone which data fields to have a look on, an
+LDAP profile file must be transferred via FTP onto the phone once. Use the http
+admin interface for that and refer to the manual for further information.
+
+The easiest method is to setup a local Docker container (mind the :z-flags for
+SELinux!):
+
+```sh
+docker run \
+    --detach \
+    --env FTP_USER=foo \
+    --env FTP_PASS=bar \
+    --name my-ftp-server \
+    --publish 20-21:20-21/tcp \
+    --publish 40000-40009:40000-40009/tcp \
+    --volume /data:/home/user:z \
+    garethflowers/ftp-server
+```
+
 ## Build and run
 
 When making changes, simply run `tox -e format` to automatically validate and
