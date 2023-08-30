@@ -44,7 +44,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
     def get_field(
         attr: Dict[str, Any], key: str, value_type: Type[Any] = str
     ) -> Optional[Any]:
-        """Fetch and cast an LDAP attribute, which might be wrapped in a list."""
+        """Fetch/cast an LDAP attribute, which might be wrapped in a list."""
         wrapper_or_value: Optional[Union[List[Any], Any]] = attr.get(key)
         if wrapper_or_value is None:
             return None
