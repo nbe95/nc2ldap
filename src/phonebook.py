@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 from ldap3 import ALL, ALL_ATTRIBUTES, Connection, Server
 
-from contact import Contact
+from contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
 
 logging.basicConfig(level=logging.DEBUG if "DEBUG" in env else logging.INFO)
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class Phonebook:
         for item in response:
             attributes: Dict[str, Any] = item.get("attributes", {})
             try:
-                contact: Contact = Contact.from_ldap_dict(attributes)
+                contact: Contact = contact_from_ldap_dict(attributes)
                 result.append(contact)
                 logger.info("Successfully parsed LDAP contact %s.", contact)
             except TypeError:
@@ -73,7 +73,7 @@ class Phonebook:
         self.ldap.add(
             f"cn={contact.get_cn()},{self.phonebook}",
             [self.contact_ou],
-            contact.to_ldap_dict(),
+            contact_to_ldap_dict(contact),
         )
         logger.info("Added contact %s to phonebook.", contact)
         return False
