@@ -8,8 +8,9 @@ periodical basis.
 
 ## Build and run
 
-When making changes, simply run `tox` to automatically validate and format the
-Python code.
+When making changes, simply run `tox -e format` to automatically validate and
+format the Python code. Executing `tox` will ensure functionality by running all
+Pytest unit tests.
 
 ```sh
 docker build -t nc2ldap .
