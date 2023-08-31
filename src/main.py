@@ -3,7 +3,7 @@
 import logging
 from os import environ as env
 
-from ldap import Phonebook
+from ldap import PhoneBook
 from nextcloud import AddressBook
 
 # from simple_scheduler.event import event_scheduler
@@ -43,7 +43,7 @@ def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
     logger.info("Starting import from Nextcloud.")
 
-    phonebook: Phonebook = Phonebook(env["LDAP_HOST"], env["LDAP_PHONEBOOK"])
+    phonebook: PhoneBook = PhoneBook(env["LDAP_HOST"], env["LDAP_PHONEBOOK"])
     phonebook.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
     phonebook.create()
 

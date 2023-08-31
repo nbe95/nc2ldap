@@ -1,4 +1,4 @@
-"""Module to encapsulate the logic and functions of our LDAP phonebook."""
+"""Module to encapsulate the logic and functions of our LDAP phone book."""
 
 import logging
 from os import environ as env
@@ -12,15 +12,15 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG if "DEBUG" in env else logging.INFO)
 
 
-class Phonebook:
-    """Our LDAP Phonebook."""
+class PhoneBook:
+    """Our LDAP phone book."""
 
-    phonebook_ou: str = "organizationalUnit"
+    phone_book_ou: str = "organizationalUnit"
     contact_ou: str = "inetOrgPerson"
 
-    def __init__(self, ldap_server: str, phonebook: str) -> None:
+    def __init__(self, ldap_server: str, phone_book: str) -> None:
         """Create an LDAP server instance and connect to it."""
-        self.phonebook: str = phonebook
+        self.phone_book: str = phone_book
         self.server: Server = Server(ldap_server, get_info=ALL)
         self.ldap: Connection
         logger.info("Connected to LDAP server %s.", ldap_server)
@@ -37,21 +37,21 @@ class Phonebook:
         logger.info("Authorized as user %s", user)
 
     def create(self) -> None:
-        """Create our phonebook as organizational unit if not existent yet."""
+        """Create our phone book as organizational unit if not existent yet."""
         # pylint: disable=unsubscriptable-object
         status, _result, response, _request = self.ldap.search(
-            self.phonebook, f"(objectclass={self.phonebook_ou})"
+            self.phone_book, f"(objectclass={self.phone_book_ou})"
         )
         if status:
-            logger.info("Phonebook %s is already present.", response[0]["dn"])
+            logger.info("Phone book %s is already present.", response[0]["dn"])
         else:
-            self.ldap.add(self.phonebook, ["top", self.phonebook_ou])
-            logger.info("Created new phonebook %s.", self.phonebook)
+            self.ldap.add(self.phone_book, ["top", self.phone_book_ou])
+            logger.info("Created new phone book %s.", self.phone_book)
 
     def get_contacts(self) -> List[Contact]:
-        """Read all contacts from the phonebook."""
+        """Read all contacts from the phone book."""
         _status, _result, response, _request = self.ldap.search(
-            self.phonebook,
+            self.phone_book,
             f"(objectclass={self.contact_ou})",
             attributes=[ALL_ATTRIBUTES, "createTimestamp"],
         )
@@ -69,11 +69,11 @@ class Phonebook:
         return result
 
     def add_contact(self, contact: Contact) -> bool:
-        """Add a single contact to the phonebook."""
+        """Add a single contact to the phone ebook."""
         self.ldap.add(
-            f"cn={contact.get_cn()},{self.phonebook}",
+            f"cn={contact.get_cn()},{self.phone_book}",
             [self.contact_ou],
             contact_to_ldap_dict(contact),
         )
-        logger.info("Added contact %s to phonebook.", contact)
+        logger.info("Added contact %s to phone book.", contact)
         return False

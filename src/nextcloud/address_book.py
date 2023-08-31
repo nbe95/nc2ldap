@@ -38,6 +38,7 @@ class AddressBook:
             with self.client.open(file) as handle:
                 contact: Component = readOne(handle)
                 result.append(contact)
-                logger.info("Read Nextcloud contact %s.", contact.fn.value)
+                logger.debug("Read Nextcloud contact %s.", contact.fn.value)
 
+        logger.info("Read a total of %i Nextcloud contacts.", len(result))
         return result

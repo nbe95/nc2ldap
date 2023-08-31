@@ -1,5 +1,5 @@
 """Module for LDAP server related operations and interfaces."""
 
-from .phonebook import Phonebook
+from .phone_book import PhoneBook
 
-__ALL__ = (Phonebook,)
+__ALL__ = (PhoneBook,)
