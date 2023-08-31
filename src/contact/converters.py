@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 from phonenumbers import PhoneNumber, PhoneNumberFormat, format_number, parse
 from phonenumbers.phonenumberutil import NumberParseException
 
-from .main import Contact
+from .contact import Contact
 
 
 def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:

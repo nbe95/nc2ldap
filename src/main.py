@@ -3,36 +3,47 @@
 import logging
 from os import environ as env
 
+from ldap import Phonebook
+from nextcloud import AddressBook
+
 # from simple_scheduler.event import event_scheduler
-from time import sleep
+# from time import sleep
 
-from phonebook import Phonebook
-
-logging.basicConfig(level=logging.DEBUG if "DEBUG" in env else logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG if "DEBUG" in env else logging.INFO)
 
 
 def main():
     """Run main entry point."""
-    logger.info(
-        "Setting up task scheduler to run at %s.", env["IMPORT_SCHEDULE"]
-    )
+    # logger.info(
+    #     "Setting up task scheduler to run at %s.", env["IMPORT_SCHEDULE"]
+    # )
     # event_scheduler.add_job(
     #    job_name="Nextcloud contacts to LDAP export",
     #    target=do_import,
     #    when=[env["SCHEDULE"]]
     # )
     # event_scheduler.run()
-    do_import()
-    while True:
-        sleep(1)
+
+    book = AddressBook(
+        env["NEXTCLOUD_HOST"],
+        env["NEXTCLOUD_ADDRESSBOOK"],
+        env["NEXTCLOUD_USER"],
+        env["NEXTCLOUD_APP_TOKEN"],
+    )
+    book.get_contacts()
+
+    # do_import()
+    # while True:
+    # sleep(1)
 
 
 def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
     logger.info("Starting import from Nextcloud.")
 
-    phonebook: Phonebook = Phonebook(env["LDAP_SERVER"], env["LDAP_PHONEBOOK"])
+    phonebook: Phonebook = Phonebook(env["LDAP_HOST"], env["LDAP_PHONEBOOK"])
     phonebook.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
     phonebook.create()
 

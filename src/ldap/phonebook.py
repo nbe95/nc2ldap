@@ -8,8 +8,8 @@ from ldap3 import ALL, ALL_ATTRIBUTES, Connection, Server
 
 from contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
 
-logging.basicConfig(level=logging.DEBUG if "DEBUG" in env else logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG if "DEBUG" in env else logging.INFO)
 
 
 class Phonebook:

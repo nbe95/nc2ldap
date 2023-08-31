@@ -8,6 +8,8 @@ periodical basis.
 
 ## Prerequisites
 
+### Hardware
+
 In order to tell our OpenStage40 phone which data fields to have a look on, an
 LDAP profile file must be transferred via FTP onto the phone once. Use the http
 admin interface for that and refer to the manual for further information.
@@ -26,6 +28,17 @@ docker run -d \
     garethflowers/ftp-server
 ```
 
+### Software
+
+In order to make this plugin work, you will want to create a Nextcloud app token
+instead of using your plain credentials. ;)
+This ensures that we can grab contact data without damaging your Nextcloud
+files. Visit `{NEXTCLOUD_URL}/settings/user/security` and scroll down to create
+a new token with the name "nc2ldap". Save the user name and the password in the
+corresponding fields within the .env file.
+
+> If file-not-found related problems arise, try to **capitalize the user name**.
+
 ## Build and run
 
 Always use a virtual environment instead of your system's Python interpreter.
@@ -33,9 +46,10 @@ Always use a virtual environment instead of your system's Python interpreter.
 ```sh
 python -m venv venv
 source venv/bin/active
+pip install --upgrade tox
 ```
 
-When making changes, simply run `tox -e format` to automatically validate and
+When making changes, simply run `tox -e lint` to automatically validate and
 format the Python code. Executing `tox` will ensure functionality by running all
 unit tests.
 
