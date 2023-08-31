@@ -30,12 +30,13 @@ docker run -d \
 
 ### Software
 
-In order to make this plugin work, you will want to create a Nextcloud app token
-instead of using your plain credentials. ;)
-This ensures that we can grab contact data without damaging your Nextcloud
-files. Visit `{NEXTCLOUD_URL}/settings/user/security` and scroll down to create
-a new token with the name "nc2ldap". Save the user name and the password in the
-corresponding fields within the .env file.
+In order to make this plugin work, you will want to create a Nextcloud app
+token, which has no direct file access, instead of using your plain credentials.
+;)
+This ensures that we can grab contact data without damaging any of your
+Nextcloud files. Visit `{NEXTCLOUD_URL}/settings/user/security` and scroll down
+to create a new token with the name "nc2ldap". Save the user name and the
+password in the corresponding fields within the .env file.
 
 > If file-not-found related problems arise, try to **capitalize the user name**.
 
