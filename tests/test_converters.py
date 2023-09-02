@@ -3,7 +3,7 @@
 from typing import Any, Dict
 
 import pytest
-from phonenumbers import parse
+from phonenumbers import FrozenPhoneNumber, parse
 from vobject.base import Component, readOne
 
 from contact import (
@@ -21,10 +21,10 @@ from contact import (
         (Contact("Noah", "Bettgen"), {"givenName": "Noah", "sn": "Bettgen"}),
         (
             Contact(
-                phone_private=parse("+49 5555 123"),
-                phone_mobile=parse("+49 5555 234"),
-                phone_business1=parse("+49 5555 345"),
-                phone_business2=parse("+49 5555 456"),
+                phone_private=FrozenPhoneNumber(parse("+49 5555 123")),
+                phone_mobile=FrozenPhoneNumber(parse("+49 5555 234")),
+                phone_business1=FrozenPhoneNumber(parse("+49 5555 345")),
+                phone_business2=FrozenPhoneNumber(parse("+49 5555 456")),
             ),
             {
                 "homePhone": "+49 5555 123",
@@ -68,10 +68,10 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
                 "facsimileTelephoneNumber": "+49 5555 456",
             },
             Contact(
-                phone_private=parse("+49 5555 123"),
-                phone_mobile=parse("+49 5555 234"),
-                phone_business1=parse("+49 5555 345"),
-                phone_business2=parse("+49 5555 456"),
+                phone_private=FrozenPhoneNumber(parse("+49 5555 123")),
+                phone_mobile=FrozenPhoneNumber(parse("+49 5555 234")),
+                phone_business1=FrozenPhoneNumber(parse("+49 5555 345")),
+                phone_business2=FrozenPhoneNumber(parse("+49 5555 456")),
             ),
         ),
         (
@@ -93,10 +93,11 @@ def test_ldap_to_contact(data: Dict[str, Any], expected: Contact) -> None:
     assert contact_from_ldap_dict(data) == expected
 
 
-def test_vcard_to_contact():
-    """Check function converting a vCard data structure to a contact object."""
-
-    serialized: str = """
+@pytest.mark.parametrize(
+    ("serialized", "expected"),
+    [
+        (
+            """
 BEGIN:VCARD
 VERSION:3.0
 N:Bettgen;Noah;;Verwöhnter Kater;
@@ -111,19 +112,34 @@ TEL:+49 5555 888
 item1.ADR;type=HOME;type=pref:;;Ulrichstr. 3;Alpen;;46519;Deutschland
 item1.X-ABADR:de
 END:VCARD
-"""
-    expected: Contact = Contact(
-        "Noah",
-        "Bettgen",
-        ("Ulrichstr. 3", "46519 Alpen"),
-        "katze@katzenhaus.cat",
-        "Black Cat & Paws Inc.",
-        "Verwöhnter Kater",
-        parse("+49 5555 123"),
-        parse("+49 5555 234"),
-        parse("+49 5555 345"),
-        None,
-    )
-
+""",
+            Contact(
+                "Noah",
+                "Bettgen",
+                ("Ulrichstr. 3", "46519 Alpen"),
+                "katze@katzenhaus.cat",
+                "Black Cat & Paws Inc.",
+                "Verwöhnter Kater",
+                FrozenPhoneNumber(parse("+49 5555 123")),
+                FrozenPhoneNumber(parse("+49 5555 234")),
+                FrozenPhoneNumber(parse("+49 5555 345")),
+                None,
+            ),
+        ),
+        (
+            """
+BEGIN:VCARD
+VERSION:3.0
+N:One, Two, Three;;;Dres.;
+FN:Dres. One, Two, Three
+END:VCARD
+""",
+            Contact(first_name="", last_name="One, Two, Three", title="Dres."),
+        ),
+    ],
+    ids=("General", "Multiple last names"),
+)
+def test_vcard_to_contact(serialized: str, expected: Contact):
+    """Check function converting a vCard data structure to a contact object."""
     vcard: Component = readOne(serialized)
     assert expected == contact_from_vcard(vcard)
