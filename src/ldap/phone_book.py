@@ -2,7 +2,7 @@
 
 import logging
 from os import environ as env
-from typing import Any, Dict, List
+from typing import Any, Dict, Set
 
 from ldap3 import ALL, ALL_ATTRIBUTES, Connection, Server
 
@@ -48,19 +48,19 @@ class PhoneBook:
             self.ldap.add(self.phone_book, ["top", self.phone_book_ou])
             logger.info("Created new phone book %s.", self.phone_book)
 
-    def get_contacts(self) -> List[Contact]:
+    def get_contacts(self) -> Set[Contact]:
         """Read all contacts from the phone book."""
         _status, _result, response, _request = self.ldap.search(
             self.phone_book,
             f"(objectclass={self.contact_ou})",
             attributes=[ALL_ATTRIBUTES],
         )
-        result: List[Contact] = []
+        result: Set[Contact] = set()
         for item in response:
             attributes: Dict[str, Any] = item.get("attributes", {})
             try:
                 contact: Contact = contact_from_ldap_dict(attributes)
-                result.append(contact)
+                result.add(contact)
                 logger.info("Successfully parsed LDAP contact %s.", contact)
             except TypeError:
                 logger.error(

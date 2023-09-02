@@ -2,7 +2,7 @@
 
 import logging
 from os import environ as env
-from typing import Generator, List
+from typing import Generator, Set
 
 from vobject.base import Component, readOne
 from webdav4.client import Client
@@ -31,16 +31,16 @@ class AddressBook:
         """Fetch a list of  vfc files representing this address book."""
         return (file["href"] for file in self.client.ls(self.webdav_path))
 
-    def get_contacts(self) -> List[Contact]:
+    def get_contacts(self) -> Set[Contact]:
         """Fetch all Nextcloud contacts as vCards."""
-        result: List[Contact] = []
+        result: Set[Contact] = set()
         for file in self.get_vcf_files():
             logger.debug("Reading vcf contact file %s.", file)
 
             with self.client.open(file) as handle:
                 contact: Component = readOne(handle)
                 logger.debug("Reading Nextcloud contact %s.", contact.fn.value)
-                result.append(contact_from_vcard(contact))
+                result.add(contact_from_vcard(contact))
 
         logger.info("Read a total of %i Nextcloud contacts.", len(result))
         return result

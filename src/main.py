@@ -42,7 +42,7 @@ def do_import():
         env["NEXTCLOUD_USER"],
         env["NEXTCLOUD_APP_TOKEN"],
     )
-    nc_contacts: Set[Contact] = set(nc_address_book.get_contacts())
+    nc_contacts: Set[Contact] = nc_address_book.get_contacts()
 
     logger.info("Gathering data from local LDAP phone book.")
     ldap_phone_book: PhoneBook = PhoneBook(
@@ -50,7 +50,7 @@ def do_import():
     )
     ldap_phone_book.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
     ldap_phone_book.create()
-    ldap_contacts: Set[Contact] = set(ldap_phone_book.get_contacts())
+    ldap_contacts: Set[Contact] = ldap_phone_book.get_contacts()
 
     contacts_to_delete: Set[Contact] = ldap_contacts - nc_contacts
     contacts_to_add: Set[Contact] = nc_contacts - ldap_contacts
