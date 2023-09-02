@@ -134,7 +134,7 @@ N:One, Two, Three;;;Dres.;
 FN:Dres. One, Two, Three
 END:VCARD
 """,
-            Contact(first_name="", last_name="One, Two, Three", title="Dres."),
+            Contact(last_name="One, Two, Three", title="Dres."),
         ),
     ],
     ids=("General", "Multiple last names"),

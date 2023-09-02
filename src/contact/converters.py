@@ -127,20 +127,16 @@ def contact_from_vcard(vcard: Component) -> Contact:
         filtered_items: List[Any] = list(filter(filter_func, items))
         if not filtered_items:
             logger.error(
-                "No filter results for key '%s' and filter '%s' in vCard for "
-                "%s.",
+                "No filter results for key '%s' in vCard for %s.",
                 key,
-                filter_func,
                 vcard.fn.value,
             )
             return None
 
         if len(filtered_items) > 1:
             logger.warning(
-                "Multiple filter results for key '%s' and filter '%s' in "
-                "vCard for %s.",
+                "Multiple filter results for key '%s' in vCard for %s.",
                 key,
-                filter_func,
                 vcard.fn.value,
             )
         return filtered_items[0].value
@@ -155,18 +151,13 @@ def contact_from_vcard(vcard: Component) -> Contact:
             for type_str in types
         )
 
-    first_name: str = (
-        # "" if isinstance(vcard.n.value.family, list) else vcard.n.value.given
-        vcard.n.value.given
-    )
-    last_name: str = (
-        vcard.n.value.family
+    first_name: Optional[str] = vcard.n.value.given or None
+    last_name: Optional[str] = (
+        vcard.n.value.family or None
         if not isinstance(vcard.n.value.family, list)
         else ", ".join(str(n).strip() for n in vcard.n.value.family)
     )
-    title: str = (
-        "" if not hasattr(vcard.n.value, "prefix") else vcard.n.value.prefix
-    )
+    title: Optional[str] = vcard.n.value.prefix or None
     address: Optional[Address] = get_field(
         vcard, "adr", lambda f: is_type(f, "home")
     )
