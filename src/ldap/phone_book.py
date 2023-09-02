@@ -53,7 +53,7 @@ class PhoneBook:
         _status, _result, response, _request = self.ldap.search(
             self.phone_book,
             f"(objectclass={self.contact_ou})",
-            attributes=[ALL_ATTRIBUTES, "createTimestamp"],
+            attributes=[ALL_ATTRIBUTES],
         )
         result: List[Contact] = []
         for item in response:
