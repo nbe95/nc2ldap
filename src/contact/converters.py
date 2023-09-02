@@ -4,10 +4,15 @@ import logging
 from os import environ as env
 from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
 
-from phonenumbers import PhoneNumber, PhoneNumberFormat, format_number, parse
+from phonenumbers import (
+    FrozenPhoneNumber,
+    PhoneNumberFormat,
+    format_number,
+    parse,
+)
 from phonenumbers.phonenumberutil import NumberParseException
 from vobject.base import Component
-from vobject.vcard import Address, Name
+from vobject.vcard import Address
 
 from .contact import Contact
 
@@ -24,7 +29,7 @@ def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
         """Add all set values to the result dictionary and format them."""
         if value is not None:
             parsed: str
-            if isinstance(value, PhoneNumber):
+            if isinstance(value, FrozenPhoneNumber):
                 parsed = format_number(value, PhoneNumberFormat.INTERNATIONAL)
             else:
                 parsed = value
@@ -66,7 +71,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
                 )
             value = wrapper_or_value[0]
 
-        if value_type == PhoneNumber:
+        if value_type == FrozenPhoneNumber:
             try:
                 return parse(value)
             except NumberParseException:
@@ -80,10 +85,10 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
         get_field(data, "mail"),
         get_field(data, "o"),
         get_field(data, "title"),
-        get_field(data, "homePhone", PhoneNumber),
-        get_field(data, "mobile", PhoneNumber),
-        get_field(data, "telephoneNumber", PhoneNumber),
-        get_field(data, "facsimileTelephoneNumber", PhoneNumber),
+        get_field(data, "homePhone", FrozenPhoneNumber),
+        get_field(data, "mobile", FrozenPhoneNumber),
+        get_field(data, "telephoneNumber", FrozenPhoneNumber),
+        get_field(data, "facsimileTelephoneNumber", FrozenPhoneNumber),
     )
 
 
@@ -150,7 +155,18 @@ def contact_from_vcard(vcard: Component) -> Contact:
             for type_str in types
         )
 
-    name: Name = vcard.n.value
+    first_name: str = (
+        # "" if isinstance(vcard.n.value.family, list) else vcard.n.value.given
+        vcard.n.value.given
+    )
+    last_name: str = (
+        vcard.n.value.family
+        if not isinstance(vcard.n.value.family, list)
+        else ", ".join(str(n).strip() for n in vcard.n.value.family)
+    )
+    title: str = (
+        "" if not hasattr(vcard.n.value, "prefix") else vcard.n.value.prefix
+    )
     address: Optional[Address] = get_field(
         vcard, "adr", lambda f: is_type(f, "home")
     )
@@ -168,24 +184,23 @@ def contact_from_vcard(vcard: Component) -> Contact:
         vcard, "tel", lambda f: is_type(f, ("voice", "work"))
     )
 
-    print(vcard.contents)
     return Contact(
-        name.given,
-        name.family,
+        first_name,
+        last_name,
         (None, None)
         if address is None
         else (address.street, " ".join((address.code, address.city))),
         mail,
         org if not isinstance(org, list) else " ".join(org),
-        name.prefix,
+        title,
         None
         if phone_home is None
-        else parse(phone_home, env["DEFAULT_REGION"]),
+        else FrozenPhoneNumber(parse(phone_home, env["DEFAULT_REGION"])),
         None
         if phone_cell is None
-        else parse(phone_cell, env["DEFAULT_REGION"]),
+        else FrozenPhoneNumber(parse(phone_cell, env["DEFAULT_REGION"])),
         None
         if phone_work is None
-        else parse(phone_work, env["DEFAULT_REGION"]),
+        else FrozenPhoneNumber(parse(phone_work, env["DEFAULT_REGION"])),
         None,
     )

@@ -3,10 +3,10 @@
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
-from phonenumbers import PhoneNumber
+from phonenumbers import FrozenPhoneNumber
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class Contact:
     """Contact structure for an independent and comparable base."""
 
@@ -16,10 +16,10 @@ class Contact:
     email: Optional[str] = None
     company: Optional[str] = None
     title: Optional[str] = None
-    phone_private: Optional[PhoneNumber] = None
-    phone_mobile: Optional[PhoneNumber] = None
-    phone_business1: Optional[PhoneNumber] = None
-    phone_business2: Optional[PhoneNumber] = None
+    phone_private: Optional[FrozenPhoneNumber] = None
+    phone_mobile: Optional[FrozenPhoneNumber] = None
+    phone_business1: Optional[FrozenPhoneNumber] = None
+    phone_business2: Optional[FrozenPhoneNumber] = None
 
     def get_cn(self) -> str:
         """Build a CN based on this contact's data."""
