@@ -4,8 +4,14 @@ from typing import Any, Dict
 
 import pytest
 from phonenumbers import parse
+from vobject.base import Component, readOne
 
-from contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
+from contact import (
+    Contact,
+    contact_from_ldap_dict,
+    contact_from_vcard,
+    contact_to_ldap_dict,
+)
 
 
 @pytest.mark.parametrize(
@@ -87,22 +93,37 @@ def test_ldap_to_contact(data: Dict[str, Any], expected: Contact) -> None:
     assert contact_from_ldap_dict(data) == expected
 
 
-# NIKLAS = Contact(
-#     first_name="Niklas",
-#     last_name="Bettgen",
-#     address=("Ulrichstr. 3", "46519 Alpen"),
-#     email="niklas@bettgen.de",
-#     company="Bertrandt Development GmbH",
-#     title="Bitschubser 1. Klasse",
-#     phone_private=phonenumbers.parse("+4928029589333"),
-#     phone_mobile=phonenumbers.parse("+4915170080598"),
-# )
-#
-# MARION = Contact(
-#     first_name="Marion",
-#     last_name="Sadowski",
-#     address=("Ulrichstr. 3", "46519 Alpen"),
-#     email="marion@bettgen.de",
-#     phone_private=phonenumbers.parse("+49280295893334"),
-# )
-#
+def test_vcard_to_contact():
+    """Check function converting a vCard data structure to a contact object."""
+
+    serialized: str = """
+BEGIN:VCARD
+VERSION:3.0
+N:Bettgen;Noah;;Verwöhnter Kater;
+FN:Noah Bettgen
+ORG:Black Cat & Paws Inc.;
+EMAIL;type=INTERNET;type=HOME;type=pref:katze@katzenhaus.cat
+TEL;type=CELL;type=VOICE;type=pref:+49 5555 234
+TEL;type=WORK;type=VOICE:05555 345
+TEL;type=HOME;type=VOICE:+49 5555 123
+TEL;type=HOME;type=FAX:+49 5555 999
+TEL:+49 5555 888
+item1.ADR;type=HOME;type=pref:;;Ulrichstr. 3;Alpen;;46519;Deutschland
+item1.X-ABADR:de
+END:VCARD
+"""
+    expected: Contact = Contact(
+        "Noah",
+        "Bettgen",
+        ("Ulrichstr. 3", "46519 Alpen"),
+        "katze@katzenhaus.cat",
+        "Black Cat & Paws Inc.",
+        "Verwöhnter Kater",
+        parse("+49 5555 123"),
+        parse("+49 5555 234"),
+        parse("+49 5555 345"),
+        None,
+    )
+
+    vcard: Component = readOne(serialized)
+    assert expected == contact_from_vcard(vcard)

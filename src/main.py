@@ -50,7 +50,7 @@ def do_import():
     # phonebook.add_contact(NIKLAS)
     # phonebook.add_contact(MARION)
 
-    logger.warning(phonebook.get_contacts())
+    phonebook.get_contacts()
 
 
 if __name__ == "__main__":
