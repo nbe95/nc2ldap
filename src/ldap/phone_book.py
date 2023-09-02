@@ -68,12 +68,16 @@ class PhoneBook:
                 )
         return result
 
-    def add_contact(self, contact: Contact) -> bool:
-        """Add a single contact to the phone ebook."""
+    def add_contact(self, contact: Contact) -> None:
+        """Add a single contact to the phone book."""
         self.ldap.add(
             f"cn={contact.get_cn()},{self.phone_book}",
             [self.contact_ou],
             contact_to_ldap_dict(contact),
         )
         logger.info("Added contact %s to phone book.", contact)
-        return False
+
+    def delete_contact(self, contact: Contact) -> None:
+        """Remove a single contact from the phone book."""
+        self.ldap.delete(f"cn={contact.get_cn()},{self.phone_book}")
+        logger.info("Deleted contact %s from phone book.", contact)

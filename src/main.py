@@ -57,8 +57,14 @@ def do_import():
 
     logger.info("Found %i total upstream contacts.", len(nc_contacts))
     logger.info("Found %i total local contacts.", len(ldap_contacts))
-    logger.info("%i contacts will be deleted.", len(contacts_to_delete))
-    logger.info("%i contacts will be added.", len(contacts_to_add))
+
+    for contact in contacts_to_delete:
+        ldap_phone_book.delete_contact(contact)
+    logger.info("Deleted a total of %i contacts.", len(contacts_to_delete))
+
+    for contact in contacts_to_add:
+        ldap_phone_book.add_contact(contact)
+    logger.info("Added a total of %i contacts.", len(contacts_to_add))
 
 
 if __name__ == "__main__":
