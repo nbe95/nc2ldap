@@ -1,6 +1,7 @@
 """Module to encapsulate the logic and functions of our LDAP phone book."""
 
 import logging
+from dataclasses import asdict
 from os import environ as env
 from typing import Any, Dict, Set
 
@@ -70,14 +71,15 @@ class PhoneBook:
 
     def add_contact(self, contact: Contact) -> None:
         """Add a single contact to the phone book."""
+        logger.error(asdict(contact))
         self.ldap.add(
             f"cn={contact.get_cn()},{self.phone_book}",
             [self.contact_ou],
             contact_to_ldap_dict(contact),
         )
-        logger.info("Added contact %s to phone book.", contact)
+        logger.info("Added %s to phone book.", contact)
 
     def delete_contact(self, contact: Contact) -> None:
         """Remove a single contact from the phone book."""
         self.ldap.delete(f"cn={contact.get_cn()},{self.phone_book}")
-        logger.info("Deleted contact %s from phone book.", contact)
+        logger.info("Deleted %s from phone book.", contact)

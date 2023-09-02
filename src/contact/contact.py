@@ -22,8 +22,9 @@ class Contact:
     phone_business2: Optional[FrozenPhoneNumber] = None
 
     def get_cn(self) -> str:
-        """Build a CN based on this contact's data."""
-        return f"{self.first_name or ''} {self.last_name or ''}".strip()
+        """Build a CN based on this contact's data (full name or company)."""
+        name: str = f"{self.first_name or ''} {self.last_name or ''}".strip()
+        return name or self.company or ""
 
     def __repr__(self) -> str:
         """Generate a serialized representation for nice log output."""
