@@ -7,6 +7,8 @@ from typing import Generator, List
 from vobject.base import Component, readOne
 from webdav4.client import Client
 
+from contact import Contact, contact_from_vcard
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG if "DEBUG" in env else logging.INFO)
 
@@ -29,16 +31,16 @@ class AddressBook:
         """Fetch a list of  vfc files representing this address book."""
         return (file["href"] for file in self.client.ls(self.webdav_path))
 
-    def get_contacts(self) -> List[Component]:
+    def get_contacts(self) -> List[Contact]:
         """Fetch all Nextcloud contacts as vCards."""
-        result: List[Component] = []
+        result: List[Contact] = []
         for file in self.get_vcf_files():
             logger.debug("Reading vcf contact file %s.", file)
 
             with self.client.open(file) as handle:
                 contact: Component = readOne(handle)
-                result.append(contact)
-                logger.debug("Read Nextcloud contact %s.", contact.fn.value)
+                logger.debug("Reading Nextcloud contact %s.", contact.fn.value)
+                result.append(contact_from_vcard(contact))
 
         logger.info("Read a total of %i Nextcloud contacts.", len(result))
         return result
