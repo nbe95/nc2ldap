@@ -37,7 +37,7 @@ def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
 
     result: Dict[str, str] = {}
     set_value(result, "givenName", contact.first_name)
-    set_value(result, "sn", contact.last_name)
+    set_value(result, "sn", contact.last_name or " ")   # not optional
     set_value(result, "telephoneNumber", contact.phone_business1)
     set_value(result, "facsimileTelephoneNumber", contact.phone_business2)
     set_value(result, "mobile", contact.phone_mobile)
@@ -152,8 +152,9 @@ def contact_from_vcard(vcard: Component) -> Contact:
         )
 
     first_name: Optional[str] = vcard.n.value.given or None
-    last_name: Optional[str] = (
-        vcard.n.value.family or None
+    # Note: The 'sn' attribute is not optional
+    last_name: str = (
+        vcard.n.value.family
         if not isinstance(vcard.n.value.family, list)
         else ", ".join(str(n).strip() for n in vcard.n.value.family)
     )
