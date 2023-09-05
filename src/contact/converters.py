@@ -1,8 +1,9 @@
 """Module contact conversion functions."""
 
 import logging
+from dataclasses import dataclass
 from os import environ as env
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from phonenumbers import (
     FrozenPhoneNumber,
@@ -37,7 +38,7 @@ def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
 
     result: Dict[str, str] = {}
     set_value(result, "givenName", contact.first_name)
-    set_value(result, "sn", contact.last_name or " ")   # not optional
+    set_value(result, "sn", contact.last_name or " ")  # not optional
     set_value(result, "telephoneNumber", contact.phone_business1)
     set_value(result, "facsimileTelephoneNumber", contact.phone_business2)
     set_value(result, "mobile", contact.phone_mobile)
@@ -94,88 +95,117 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
 
 def contact_from_vcard(vcard: Component) -> Contact:
     """Fetch contact data from a vCard data structure."""
+    # pylint: disable=too-many-locals
 
-    def get_field(
-        vcard: Component,
-        key: str,
-        filter_func: Optional[Callable[[Component], bool]] = None,
-    ) -> Any:
-        """Extract a single value from a specific field matching criteria."""
-        items: List[Any] = vcard.contents.get(key, [])
-        if not items:
-            logger.debug(
-                "Key '%s' not available in vCard for %s.", key, vcard.fn.value
+    @dataclass(frozen=True)
+    class ValueAttrList:
+        """Class for easy handling of values with specific attributes."""
+
+        attr_list: List[str]
+        value: Any
+
+        def has_attr(self, type_str: str) -> bool:
+            """Check whether this field has a specific attribute."""
+            return type_str.lower() in (t.lower() for t in self.attr_list)
+
+    def get_fields(vcard: Component, key: str) -> List[ValueAttrList]:
+        """Get field list for a specific key with associated attributes."""
+        return [
+            ValueAttrList(
+                [] if not item.params else item.type_paramlist,  # type: ignore
+                item.value,  # type: ignore
             )
-            return None
+            for item in vcard.contents.get(key, [])
+        ]
 
-        if len(items) == 1:
-            logger.debug(
-                "Found unique key '%s' in vCard for %s.", key, vcard.fn.value
-            )
-            return items[0].value
-
-        # Filter multiple available values
-        if filter_func is None:
-            logger.warning(
-                "Returning first of multiple available values for key '%s' in "
-                "vCard for %s.",
-                key,
-                vcard.fn.value,
-            )
-            return items[0].value
-
-        filtered_items: List[Any] = list(filter(filter_func, items))
-        if not filtered_items:
-            logger.error(
-                "No filter results for key '%s' in vCard for %s.",
-                key,
-                vcard.fn.value,
-            )
-            return None
-
-        if len(filtered_items) > 1:
-            logger.warning(
-                "Multiple filter results for key '%s' in vCard for %s.",
-                key,
-                vcard.fn.value,
-            )
-        return filtered_items[0].value
-
-    def is_type(component: Component, types: Iterable[str]) -> bool:
-        # Catch argument without type specification (e.g. a phone number of
-        # type "Notfall")
-        if not component.params:
-            return False
-        return all(
-            type_str.lower() in (t.lower() for t in component.type_paramlist)
-            for type_str in types
+    def take_field_with_attr(
+        fields: List[ValueAttrList], attr: str
+    ) -> Tuple[Any, List[ValueAttrList]]:
+        """Assign a specific value with attribute matching criteria."""
+        filtered: List[ValueAttrList] = list(
+            filter(lambda x: x.has_attr(attr), fields)
         )
+        if not filtered:
+            return (None, fields)
 
+        target: Any = filtered.pop()
+        if filtered:
+            logger.warning(
+                "Found multiple '%s' attributes in vCard for %s: %s",
+                attr,
+                vcard.fn.value,
+                filtered,
+            )
+        fields.remove(target)
+        return (target.value, fields)
+
+    def take_first_field(
+        fields: List[ValueAttrList],
+    ) -> Tuple[Any, List[ValueAttrList]]:
+        """Assign the first available attribute."""
+        if not fields:
+            return (None, fields)
+
+        target = fields.pop()
+        if fields:
+            logger.warning(
+                "Found multiple uncategorized attributes in vCard for %s: %s",
+                vcard.fn.value,
+                fields,
+            )
+        return (target.value, fields)
+
+    # Match name and title (Note: The 'sn' attribute is not optional)
     first_name: Optional[str] = vcard.n.value.given or None
-    # Note: The 'sn' attribute is not optional
     last_name: str = (
         vcard.n.value.family
         if not isinstance(vcard.n.value.family, list)
         else ", ".join(str(n).strip() for n in vcard.n.value.family)
     )
     title: Optional[str] = vcard.n.value.prefix or None
-    address: Optional[Address] = get_field(
-        vcard, "adr", lambda f: is_type(f, "home")
-    )
-    org: Optional[Union[str, List[str]]] = get_field(vcard, "org")
-    mail: Optional[str] = get_field(
-        vcard, "email", lambda f: is_type(f, "home")
-    )
-    phone_home: Optional[str] = get_field(
-        vcard, "tel", lambda f: is_type(f, ("voice", "home"))
-    )
-    phone_cell: Optional[str] = get_field(
-        vcard, "tel", lambda f: is_type(f, ("voice", "cell"))
-    )
-    phone_work: Optional[str] = get_field(
-        vcard, "tel", lambda f: is_type(f, ("voice", "work"))
-    )
 
+    # Match address field(s)
+    address: Optional[Address] = None
+    all_addresses: List[ValueAttrList] = get_fields(vcard, "adr")
+    if all_addresses:
+        # If multiple values, take correct one; fall back to uncategorized
+        address, all_addresses = take_field_with_attr(all_addresses, "home")
+        if not address:
+            address, all_addresses = take_first_field(all_addresses)
+
+    # Match organization
+    org: Optional[Union[str, List[str]]] = None
+    all_orgs: List[ValueAttrList] = get_fields(vcard, "org")
+    if all_orgs:
+        org, all_orgs = take_first_field(all_orgs)
+
+    # Match mail addresses
+    mail: Optional[str] = None
+    all_mails: List[ValueAttrList] = get_fields(vcard, "email")
+    if all_mails:
+        # If multiple values, take correct one; fall back to uncategorized
+        mail, all_mails = take_field_with_attr(all_mails, "home")
+        if not mail:
+            mail, all_mails = take_first_field(all_mails)
+
+    # Match phone numbers
+    phone_home: Optional[str] = None
+    phone_cell: Optional[str] = None
+    phone_work: Optional[str] = None
+    all_phones: List[ValueAttrList] = list(
+        filter(lambda p: p.has_attr("voice"), get_fields(vcard, "tel"))
+    )
+    if all_phones:
+        # If multiple phone numbers are present, try to find the right ones
+        phone_home, all_phones = take_field_with_attr(all_phones, "home")
+        phone_cell, all_phones = take_field_with_attr(all_phones, "cell")
+        phone_work, all_phones = take_field_with_attr(all_phones, "work")
+
+        # Fall back to any uncategorized phone numbers (home only)
+        if not phone_home:
+            phone_home, all_phones = take_first_field(all_phones)
+
+    # Build an actual contact object using all information
     return Contact(
         first_name,
         last_name,

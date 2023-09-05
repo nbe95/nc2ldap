@@ -17,7 +17,7 @@ from contact import (
 @pytest.mark.parametrize(
     ("contact", "expected"),
     [
-        (Contact(), {}),
+        (Contact(), {"sn": " "}),
         (Contact("Noah", "Bettgen"), {"givenName": "Noah", "sn": "Bettgen"}),
         (
             Contact(
@@ -27,6 +27,7 @@ from contact import (
                 phone_business2=FrozenPhoneNumber(parse("+49 5555 456")),
             ),
             {
+                "sn": " ",
                 "homePhone": "+49 5555 123",
                 "mobile": "+49 5555 234",
                 "telephoneNumber": "+49 5555 345",
@@ -35,15 +36,19 @@ from contact import (
         ),
         (
             Contact(company="Black Cat & Paws Inc.", title="Verwöhnter Kater"),
-            {"o": "Black Cat & Paws Inc.", "title": "Verwöhnter Kater"},
+            {
+                "sn": " ",
+                "o": "Black Cat & Paws Inc.",
+                "title": "Verwöhnter Kater",
+            },
         ),
         (
             Contact(address=("Ulrichstr. 3", "46519 Alpen")),
-            {"street": "Ulrichstr. 3", "l": "46519 Alpen"},
+            {"sn": " ", "street": "Ulrichstr. 3", "l": "46519 Alpen"},
         ),
         (
             Contact(first_name="Noah", email="katze@katzenhaus.cat"),
-            {"givenName": "Noah", "mail": "katze@katzenhaus.cat"},
+            {"sn": " ", "givenName": "Noah", "mail": "katze@katzenhaus.cat"},
         ),
     ],
 )
@@ -136,8 +141,27 @@ END:VCARD
 """,
             Contact(last_name="One, Two, Three", title="Dres."),
         ),
+        (
+            """
+BEGIN:VCARD
+VERSION:3.0
+N:Bettgen;Noah;;;
+FN:Noah Bettgen
+TEL;type=VOICE:+49 5555 123
+TEL;type=CELL;type=VOICE:+49 5555 234
+TEL:+49 5555 345
+TEL;type=FAX:+49 5555 999
+END:VCARD
+""",
+            Contact(
+                first_name="Noah",
+                last_name="Bettgen",
+                phone_private=FrozenPhoneNumber(parse("+49 5555 123")),
+                phone_mobile=FrozenPhoneNumber(parse("+49 5555 234")),
+            ),
+        ),
     ],
-    ids=("General", "Multiple last names"),
+    ids=("General", "Multiple last names", "Telephone number assignment"),
 )
 def test_vcard_to_contact(serialized: str, expected: Contact):
     """Check function converting a vCard data structure to a contact object."""
