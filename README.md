@@ -19,14 +19,37 @@ SELinux!):
 
 ```sh
 docker run -d \
-    --name my-ftp-server \
-    -e FTP_USER=foo \
-    -e FTP_PASS=bar \
-    -p 20-21:20-21/tcp \
-    -p 40000-40009:40000-40009/tcp \
-    -v/data:/home/user:z \
-    garethflowers/ftp-server
+    --name ftp-server \
+    -p 21:21 \
+    -p 21000-21010:21000-21010 \
+    -e USERS="foo|bar" \
+    -v $(pwd):/home/ftp/:z \
+    delfer/alpine-ftp-server
 ```
+
+The LDAP profile can be downloaded via `Admin pages > File transfer > LDAP`.
+To function properly, it must contain the following data attributes:
+
+| Attribute         | Explanation                                           |
+|-------------------|-------------------------------------------------------|
+| SEARCHBASE        | The LDAP DN of the whole phonebook                    |
+| ATTRIB01          | Last name                                             |
+| ATTRIB02          | First name                                            |
+| ATTRIB03          | Work phone number 1                                   |
+| ATTRIB04          | Work phone number 2                                   |
+| ATTRIB05          | Cell phone number                                     |
+| ATTRIB06          | Home phone number                                     |
+| ATTRIB07          | Organization/Business                                 |
+| ATTRIB08          | Address 1 (street & house number)                     |
+| ATTRIB09          | Address 2 (zip code & town)                           |
+| ATTRIB10          | Title/name suffix                                     |
+| ATTRIB11          | Mail address                                          |
+| ATTRIB12 (opt.)   | Attribute to use for full wildcard search (e.g. "sn") |
+
+Additionally, the LDAP server data and credentials must be configured once using
+`Admin pages > System > Local functions > Directory settings`.
+
+> Note: The default admin PIN for accessing the web interface is 123456.
 
 ### Software
 

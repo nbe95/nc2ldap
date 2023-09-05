@@ -1,7 +1,7 @@
 OpenStage LDAP TEMPLATE (v.1)
 SEARCHBASE="ou=phonebook,dc=bettgen,dc=de"
-ATTRIB01="givenName"
-ATTRIB02="sn"
+ATTRIB01="sn"
+ATTRIB02="givenName"
 ATTRIB03="telephoneNumber"
 ATTRIB04="facsimileTelephoneNumber"
 ATTRIB05="mobile"
@@ -11,4 +11,5 @@ ATTRIB08="street"
 ATTRIB09="l"
 ATTRIB10="title"
 ATTRIB11="mail"
+ATTRIB12="cn"
 EOF
