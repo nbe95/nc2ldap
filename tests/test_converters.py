@@ -54,13 +54,14 @@ from contact import (
 )
 def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
     """Check function converting a contact object to an LDAP dict."""
-    assert contact_to_ldap_dict(contact) == expected
+    assert expected == contact_to_ldap_dict(contact)
 
 
 @pytest.mark.parametrize(
     ("data", "expected"),
     [
         ({}, Contact()),
+        ({ "sn": " "}, Contact()),
         (
             {"givenName": ["Noah"], "sn": "Bettgen"},
             Contact("Noah", "Bettgen"),
@@ -95,7 +96,7 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
 )
 def test_ldap_to_contact(data: Dict[str, Any], expected: Contact) -> None:
     """Check function converting an LDAP dict to a contact object."""
-    assert contact_from_ldap_dict(data) == expected
+    assert expected == contact_from_ldap_dict(data)
 
 
 @pytest.mark.parametrize(

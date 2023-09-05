@@ -63,14 +63,15 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
             return None
 
         # Extract value if wrapped in a list
-        value: Any = wrapper_or_value
+        value: Union[List[str], str] = wrapper_or_value
         if isinstance(wrapper_or_value, list):
-            if len(wrapper_or_value) > 1:
+            value = wrapper_or_value.pop()
+            if wrapper_or_value:
                 logger.error(
                     "LDAP key '%s' contains more than one value to extract.",
                     key,
                 )
-            value = wrapper_or_value[0]
+        value = value.strip()
 
         if value_type == FrozenPhoneNumber:
             try:
@@ -81,7 +82,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
 
     return Contact(
         get_field(data, "givenName"),
-        get_field(data, "sn"),
+        get_field(data, "sn") or None,
         (get_field(data, "street"), get_field(data, "l")),
         get_field(data, "mail"),
         get_field(data, "o"),
