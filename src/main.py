@@ -2,10 +2,10 @@
 
 import logging
 from os import environ as env
-
-# from simple_scheduler.event import event_scheduler
 from time import sleep
 from typing import Set
+
+import schedule
 
 from contact import Contact
 from ldap import PhoneBook
@@ -13,23 +13,18 @@ from nextcloud import AddressBook
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if "DEBUG" in env else logging.INFO)
+logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
 
 
 def main():
     """Run main entry point."""
-    # logger.info(
-    #     "Setting up task scheduler to run at %s.", env["IMPORT_SCHEDULE"]
-    # )
-    # event_scheduler.add_job(
-    #    job_name="Nextcloud contacts to LDAP export",
-    #    target=do_import,
-    #    when=[env["SCHEDULE"]]
-    # )
-    # event_scheduler.run()
-
-    do_import()
+    logger.info(
+        "Setting up task scheduler to run every day at %s.",
+        env["IMPORT_TIME_UTC"],
+    )
+    schedule.every().day.at(env["IMPORT_TIME_UTC"]).do(do_import)
     while True:
+        schedule.run_pending()
         sleep(1)
 
 

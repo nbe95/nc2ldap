@@ -18,7 +18,7 @@ from vobject.vcard import Address
 from .contact import Contact
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if "DEBUG" in env else logging.INFO)
+logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
 
 
 def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
@@ -58,12 +58,12 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
         attr: Dict[str, Any], key: str, value_type: Type[Any] = str
     ) -> Optional[Any]:
         """Fetch/cast an LDAP attribute, which might be wrapped in a list."""
-        wrapper_or_value: Optional[Union[List[Any], Any]] = attr.get(key)
+        wrapper_or_value: Optional[Union[List[str], str]] = attr.get(key)
         if wrapper_or_value is None:
             return None
 
         # Extract value if wrapped in a list
-        value: Union[List[str], str] = wrapper_or_value
+        value: str
         if isinstance(wrapper_or_value, list):
             value = wrapper_or_value.pop()
             if wrapper_or_value:
