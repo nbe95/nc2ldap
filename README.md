@@ -47,7 +47,7 @@ To function properly, it must contain the following data attributes:
 | ATTRIB12 (opt.)   | Attribute to use for full wildcard search (e.g. "sn") |
 
 Additionally, the LDAP server data and credentials must be configured once using
-`Admin pages > System > Local functions > Directory settings`.
+`Admin pages > Local functions > Directory settings`.
 
 > Note: The default admin PIN for accessing the web interface is 123456.
 
