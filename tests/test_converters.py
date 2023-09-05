@@ -61,7 +61,7 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
     ("data", "expected"),
     [
         ({}, Contact()),
-        ({ "sn": " "}, Contact()),
+        ({"sn": " "}, Contact()),
         (
             {"givenName": ["Noah"], "sn": "Bettgen"},
             Contact("Noah", "Bettgen"),

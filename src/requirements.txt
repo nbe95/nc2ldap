@@ -1,7 +1,7 @@
 ldap3
-types-ldap3
-simple-scheduler
 phonenumbers
-webdav4
+schedule
 vobject
+webdav4
+types-ldap3
 types-vobject

@@ -10,7 +10,7 @@ from webdav4.client import Client
 from contact import Contact, contact_from_vcard
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if "DEBUG" in env else logging.INFO)
+logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
 
 
 class AddressBook:
