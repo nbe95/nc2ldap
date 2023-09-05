@@ -71,7 +71,6 @@ class PhoneBook:
 
     def add_contact(self, contact: Contact) -> None:
         """Add a single contact to the phone book."""
-        logger.error(asdict(contact))
         self.ldap.add(
             f"cn={contact.get_cn()},{self.phone_book}",
             [self.contact_ou],
