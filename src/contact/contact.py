@@ -24,8 +24,8 @@ class Contact:
     def get_cn(self) -> str:
         """Build a CN based on this contact's data (full name or company)."""
         if self.first_name or self.last_name:
-            return " ".join((
-                self.title or "", self.first_name or "", self.last_name or "")
+            return " ".join(
+                (self.title or "", self.first_name or "", self.last_name or "")
             ).strip()
         return self.company or ""
 
