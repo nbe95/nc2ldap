@@ -188,9 +188,9 @@ def contact_from_vcard(vcard: Component) -> Contact:
 
     # Edge case:
     # If we've got a company, but no name at all, switch both before import
-    if not any((first_name, last_name)) and company:
-        last_name = company
-        company = None
+    if not any((first_name, last_name)) and org:
+        last_name = org
+        org = None
 
     # Match mail addresses
     mail: Optional[str] = None
