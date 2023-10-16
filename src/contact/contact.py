@@ -2,14 +2,15 @@
 
 import logging
 from dataclasses import dataclass
-from os import environ as env
 from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from phonenumbers import FrozenPhoneNumber
 
+from constants import LOG_LEVEL
+
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 
 @dataclass(frozen=True, eq=True)
