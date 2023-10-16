@@ -1,16 +1,16 @@
 """Module to manage the Nextcloud client side."""
 
 import logging
-from os import environ as env
 from typing import Generator, Set
 
 from vobject.base import Component, readOne
 from webdav4.client import Client
 
+from constants import LOG_LEVEL
 from contact import Contact, contact_from_vcard
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 
 class AddressBook:

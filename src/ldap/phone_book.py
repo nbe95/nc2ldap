@@ -1,15 +1,15 @@
 """Module to encapsulate the logic and functions of our LDAP phone book."""
 
 import logging
-from os import environ as env
 from typing import Any, Dict, Set
 
 from ldap3 import ALL, ALL_ATTRIBUTES, Connection, Server
 
+from constants import LOG_LEVEL
 from contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 
 class PhoneBook:

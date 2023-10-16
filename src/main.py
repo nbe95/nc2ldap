@@ -5,34 +5,34 @@ from os import environ as env
 from time import sleep
 from typing import Set
 
-import schedule
+from schedule import every, repeat, run_pending
 
+from constants import DEBUG, LOG_LEVEL
 from contact import Contact
 from ldap import PhoneBook
 from nextcloud import AddressBook
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 
 def main():
     """Run main entry point."""
     logger.info(
         "Setting up task scheduler to run every day at %s.",
-        env["IMPORT_TIME_UTC"],
+        env["IMPORT_TIME"],
     )
 
-    # If running in debug mode, perform import once every minute
-    if env.get("DEBUG", ""):
-        schedule.every().minute().do(do_import)
-    else:
-        schedule.every().day.at(env["IMPORT_TIME_UTC"]).do(do_import)
+    # If running in debug mode, instantly perform an import once
+    if DEBUG:
+        do_import()
     while True:
-        schedule.run_pending()
+        run_pending()
         sleep(1)
 
 
+@repeat(every().day.at(env["IMPORT_TIME"]))
 def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
     logger.info("Importing Nextcloud address book.")

@@ -15,10 +15,12 @@ from phonenumbers.phonenumberutil import NumberParseException
 from vobject.base import Component
 from vobject.vcard import Address
 
+from constants import LOG_LEVEL
+
 from .contact import Contact
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 
 def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
