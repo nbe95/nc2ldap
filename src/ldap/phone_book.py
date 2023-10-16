@@ -64,8 +64,9 @@ class PhoneBook:
                 logger.info("Successfully parsed LDAP contact %s.", contact)
             except TypeError:
                 logger.error(
-                    "Could not parse LDAP contact %s.", item.get("dn", "<?>"),
-                    exc_info=True
+                    "Could not parse LDAP contact %s.",
+                    item.get("dn", "<?>"),
+                    exc_info=True,
                 )
         return result
 

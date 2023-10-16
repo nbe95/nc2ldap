@@ -84,15 +84,25 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
         ),
         (
             {"o": "Black Cat & Paws Inc.", "title": ["Verwöhnter Kater"]},
-            Contact(last_name="<???>", company="Black Cat & Paws Inc.", title="Verwöhnter Kater"),
+            Contact(
+                last_name="<???>",
+                company="Black Cat & Paws Inc.",
+                title="Verwöhnter Kater",
+            ),
         ),
         (
             {"street": "Ulrichstr. 3", "l": ["46519 Alpen"]},
-            Contact(last_name="<???>", address=("Ulrichstr. 3", "46519 Alpen")),
+            Contact(
+                last_name="<???>", address=("Ulrichstr. 3", "46519 Alpen")
+            ),
         ),
         (
             {"givenName": "Noah", "mail": ["katze@katzenhaus.cat"]},
-            Contact(last_name="<???>", first_name="Noah", email="katze@katzenhaus.cat"),
+            Contact(
+                last_name="<???>",
+                first_name="Noah",
+                email="katze@katzenhaus.cat",
+            ),
         ),
     ],
 )
