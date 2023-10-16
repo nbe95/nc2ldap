@@ -61,7 +61,7 @@ class PhoneBook:
             try:
                 contact: Contact = contact_from_ldap_dict(attributes)
                 result.add(contact)
-                logger.info("Successfully parsed LDAP contact %s.", contact)
+                logger.debug("Successfully parsed LDAP contact %s.", contact)
             except TypeError:
                 logger.error(
                     "Could not parse LDAP contact %s.",
