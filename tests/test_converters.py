@@ -37,7 +37,8 @@ from contact import (
         (
             Contact(company="Black Cat & Paws Inc.", title="Spoiled cat"),
             {
-                "sn": "Black Cat & Paws Inc.",
+                "sn": "",
+                "o": "Black Cat & Paws Inc.",
                 "title": "Spoiled cat",
             },
         ),
@@ -60,8 +61,8 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
 @pytest.mark.parametrize(
     ("data", "expected"),
     [
-        ({}, Contact()),
-        ({"sn": ""}, Contact()),
+        ({}, Contact(last_name="<???>")),
+        ({"sn": ""}, Contact(last_name="<???>")),
         (
             {"givenName": ["Joey"], "sn": "Doe"},
             Contact("Joey", "Doe"),
@@ -74,6 +75,7 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
                 "facsimileTelephoneNumber": "+49 5555 456",
             },
             Contact(
+                last_name="<???>",
                 phone_private=FrozenPhoneNumber(parse("+49 5555 123")),
                 phone_mobile=FrozenPhoneNumber(parse("+49 5555 234")),
                 phone_business1=FrozenPhoneNumber(parse("+49 5555 345")),
@@ -82,15 +84,15 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
         ),
         (
             {"o": "Black Cat & Paws Inc.", "title": ["Spoiled cat"]},
-            Contact(company="Black Cat & Paws Inc.", title="Spoiled cat"),
+            Contact(last_name="<???>", company="Black Cat & Paws Inc.", title="Spoiled cat"),
         ),
         (
             {"street": "Catstreet 42", "l": ["12345 Kittentown"]},
-            Contact(address=("Catstreet 42", "12345 Kittentown")),
+            Contact(last_name="<???>", address=("Catstreet 42", "12345 Kittentown")),
         ),
         (
             {"givenName": "Joey", "mail": ["cat@cathouse.cat"]},
-            Contact(first_name="Joey", email="cat@cathouse.cat"),
+            Contact(last_name="<???>", first_name="Joey", email="cat@cathouse.cat"),
         ),
     ],
 )
