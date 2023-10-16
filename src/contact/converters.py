@@ -36,22 +36,14 @@ def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
                 parsed = value
             result.update({key: parsed})
 
-    # Edge case:
-    # If we've got a company, but no last name, switch both on LDAP side
-    last_name: str = contact.last_name or ""
-    company: Optional[str] = contact.company
-    if not last_name and company:
-        last_name = company
-        company = None
-
     result: Dict[str, str] = {}
     set_value(result, "givenName", contact.first_name)
-    set_value(result, "sn", last_name)
+    set_value(result, "sn", contact.last_name)
     set_value(result, "telephoneNumber", contact.phone_business1)
     set_value(result, "facsimileTelephoneNumber", contact.phone_business2)
     set_value(result, "mobile", contact.phone_mobile)
     set_value(result, "homePhone", contact.phone_private)
-    set_value(result, "o", company)
+    set_value(result, "o", contact.company)
     set_value(result, "street", contact.address[0])
     set_value(result, "l", contact.address[1])
     set_value(result, "title", contact.title)
@@ -92,7 +84,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
 
     return Contact(
         first_name=get_field(data, "givenName"),
-        last_name=get_field(data, "sn") or "",
+        last_name=get_field(data, "sn") or "<???>",
         address=(get_field(data, "street"), get_field(data, "l")),
         email=get_field(data, "mail"),
         company=get_field(data, "o"),
@@ -193,6 +185,12 @@ def contact_from_vcard(vcard: Component) -> Contact:
         one_org: Union[str, List[str]]
         one_org, all_orgs = take_first_field(all_orgs)
         org = one_org if isinstance(one_org, str) else one_org.pop()
+
+    # Edge case:
+    # If we've got a company, but no name at all, switch both before import
+    if not any((first_name, last_name)) and company:
+        last_name = company
+        company = None
 
     # Match mail addresses
     mail: Optional[str] = None
