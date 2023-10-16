@@ -17,7 +17,7 @@ from contact import (
 @pytest.mark.parametrize(
     ("contact", "expected"),
     [
-        (Contact(), {"sn": " "}),
+        (Contact(), {"sn": ""}),
         (Contact("Noah", "Bettgen"), {"givenName": "Noah", "sn": "Bettgen"}),
         (
             Contact(
@@ -27,7 +27,7 @@ from contact import (
                 phone_business2=FrozenPhoneNumber(parse("+49 5555 456")),
             ),
             {
-                "sn": " ",
+                "sn": "",
                 "homePhone": "+49 5555 123",
                 "mobile": "+49 5555 234",
                 "telephoneNumber": "+49 5555 345",
@@ -37,31 +37,31 @@ from contact import (
         (
             Contact(company="Black Cat & Paws Inc.", title="Verwöhnter Kater"),
             {
-                "sn": " ",
-                "o": "Black Cat & Paws Inc.",
+                "sn": "Black Cat & Paws Inc.",
                 "title": "Verwöhnter Kater",
             },
         ),
         (
             Contact(address=("Ulrichstr. 3", "46519 Alpen")),
-            {"sn": " ", "street": "Ulrichstr. 3", "l": "46519 Alpen"},
+            {"sn": "", "street": "Ulrichstr. 3", "l": "46519 Alpen"},
         ),
         (
             Contact(first_name="Noah", email="katze@katzenhaus.cat"),
-            {"sn": " ", "givenName": "Noah", "mail": "katze@katzenhaus.cat"},
+            {"sn": "", "givenName": "Noah", "mail": "katze@katzenhaus.cat"},
         ),
     ],
 )
 def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
     """Check function converting a contact object to an LDAP dict."""
-    assert expected == contact_to_ldap_dict(contact)
+    result: Dict[str, Any] = contact_to_ldap_dict(contact)
+    assert expected == result
 
 
 @pytest.mark.parametrize(
     ("data", "expected"),
     [
         ({}, Contact()),
-        ({"sn": " "}, Contact()),
+        ({"sn": ""}, Contact()),
         (
             {"givenName": ["Noah"], "sn": "Bettgen"},
             Contact("Noah", "Bettgen"),
@@ -96,7 +96,8 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
 )
 def test_ldap_to_contact(data: Dict[str, Any], expected: Contact) -> None:
     """Check function converting an LDAP dict to a contact object."""
-    assert expected == contact_from_ldap_dict(data)
+    result: Contact = contact_from_ldap_dict(data)
+    assert expected == result
 
 
 @pytest.mark.parametrize(
@@ -167,4 +168,5 @@ END:VCARD
 def test_vcard_to_contact(serialized: str, expected: Contact):
     """Check function converting a vCard data structure to a contact object."""
     vcard: Component = readOne(serialized)
-    assert expected == contact_from_vcard(vcard)
+    result: Contact = contact_from_vcard(vcard)
+    assert expected == result
