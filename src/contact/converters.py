@@ -63,7 +63,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
             return None
 
         # Extract value if wrapped in a list
-        value: str
+        value: str = wrapper_or_value
         if isinstance(wrapper_or_value, list):
             value = wrapper_or_value.pop()
             if wrapper_or_value:
