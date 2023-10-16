@@ -30,7 +30,7 @@ def main():
 
 def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
-    logger.info("Starting import of Nextcloud address book.")
+    logger.info("Importing Nextcloud address book.")
     nc_address_book: AddressBook = AddressBook(
         env["NEXTCLOUD_HOST"],
         env["NEXTCLOUD_ADDRESS_BOOK"],
@@ -38,6 +38,7 @@ def do_import():
         env["NEXTCLOUD_APP_TOKEN"],
     )
     nc_contacts: Set[Contact] = nc_address_book.get_contacts()
+    logger.info("Found %i upstream contacts.", len(nc_contacts))
 
     logger.info("Gathering data from local LDAP phone book.")
     ldap_phone_book: PhoneBook = PhoneBook(
@@ -46,20 +47,19 @@ def do_import():
     ldap_phone_book.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
     ldap_phone_book.create()
     ldap_contacts: Set[Contact] = ldap_phone_book.get_contacts()
+    logger.info("Found %i local contacts.", len(ldap_contacts))
 
+    # Find out which contacts to add/delete by comparing them
     contacts_to_delete: Set[Contact] = ldap_contacts - nc_contacts
     contacts_to_add: Set[Contact] = nc_contacts - ldap_contacts
 
-    logger.info("Found %i total upstream contacts.", len(nc_contacts))
-    logger.info("Found %i total local contacts.", len(ldap_contacts))
-
+    logger.info("Deleting a total of %i contacts.", len(contacts_to_delete))
     for contact in contacts_to_delete:
         ldap_phone_book.delete_contact(contact)
-    logger.info("Deleted a total of %i contacts.", len(contacts_to_delete))
 
+    logger.info("Adding a total of %i contacts.", len(contacts_to_add))
     for contact in contacts_to_add:
         ldap_phone_book.add_contact(contact)
-    logger.info("Added a total of %i contacts.", len(contacts_to_add))
 
 
 if __name__ == "__main__":
