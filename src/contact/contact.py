@@ -11,7 +11,7 @@ class Contact:
     """Contact structure for an independent and comparable base."""
 
     first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    last_name: str = ""
     address: Tuple[Optional[str], Optional[str]] = (None, None)
     email: Optional[str] = None
     company: Optional[str] = None
@@ -23,11 +23,9 @@ class Contact:
 
     def get_cn(self) -> str:
         """Build a CN based on this contact's data (full name or company)."""
-        if self.first_name or self.last_name:
-            return " ".join(
-                (self.title or "", self.first_name or "", self.last_name or "")
-            ).strip()
-        return self.company or ""
+        return " ".join(
+            (v or "" for v in (self.title, self.first_name, self.last_name))
+        ).strip()
 
     def __repr__(self) -> str:
         """Generate a serialized representation for nice log output."""
