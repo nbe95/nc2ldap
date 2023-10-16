@@ -13,3 +13,6 @@ disable = "too-many-instance-attributes"
 pythonpath = [
   ".", "src",
 ]
+env = [
+  "DEFAULT_REGION = DE"
+]

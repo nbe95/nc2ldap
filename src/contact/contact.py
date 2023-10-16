@@ -1,9 +1,16 @@
 """Module for system-independent contact management."""
 
+import logging
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
+from uuid import uuid4
 
 from phonenumbers import FrozenPhoneNumber
+
+from constants import LOG_LEVEL
+
+logger = logging.getLogger(__name__)
+logger.setLevel(LOG_LEVEL)
 
 
 @dataclass(frozen=True, eq=True)
@@ -11,7 +18,7 @@ class Contact:
     """Contact structure for an independent and comparable base."""
 
     first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    last_name: str = ""
     address: Tuple[Optional[str], Optional[str]] = (None, None)
     email: Optional[str] = None
     company: Optional[str] = None
@@ -23,11 +30,14 @@ class Contact:
 
     def get_cn(self) -> str:
         """Build a CN based on this contact's data (full name or company)."""
-        if self.first_name or self.last_name:
-            return " ".join(
-                (self.title or "", self.first_name or "", self.last_name or "")
-            ).strip()
-        return self.company or ""
+        fields: List[Optional[str]] = [
+            self.title,
+            self.first_name,
+            self.last_name,
+            f"({self.company})" if self.company else None,
+        ]
+        result: str = " ".join(v for v in fields if v).strip()
+        return result or str(uuid4())  # Always return a non-empty string!
 
     def __repr__(self) -> str:
         """Generate a serialized representation for nice log output."""

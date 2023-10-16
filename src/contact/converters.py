@@ -15,10 +15,12 @@ from phonenumbers.phonenumberutil import NumberParseException
 from vobject.base import Component
 from vobject.vcard import Address
 
+from constants import LOG_LEVEL
+
 from .contact import Contact
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if env.get("DEBUG", "") else logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 
 def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
@@ -38,7 +40,7 @@ def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
 
     result: Dict[str, str] = {}
     set_value(result, "givenName", contact.first_name)
-    set_value(result, "sn", contact.last_name or " ")  # not optional
+    set_value(result, "sn", contact.last_name)
     set_value(result, "telephoneNumber", contact.phone_business1)
     set_value(result, "facsimileTelephoneNumber", contact.phone_business2)
     set_value(result, "mobile", contact.phone_mobile)
@@ -71,26 +73,30 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
                     "LDAP key '%s' contains more than one value to extract.",
                     key,
                 )
+        else:
+            value = wrapper_or_value
         value = value.strip()
 
         if value_type == FrozenPhoneNumber:
             try:
-                return parse(value)
+                return FrozenPhoneNumber(parse(value))
             except NumberParseException:
                 return None
         return value
 
     return Contact(
-        get_field(data, "givenName"),
-        get_field(data, "sn") or None,
-        (get_field(data, "street"), get_field(data, "l")),
-        get_field(data, "mail"),
-        get_field(data, "o"),
-        get_field(data, "title"),
-        get_field(data, "homePhone", FrozenPhoneNumber),
-        get_field(data, "mobile", FrozenPhoneNumber),
-        get_field(data, "telephoneNumber", FrozenPhoneNumber),
-        get_field(data, "facsimileTelephoneNumber", FrozenPhoneNumber),
+        first_name=get_field(data, "givenName"),
+        last_name=get_field(data, "sn") or "<???>",
+        address=(get_field(data, "street"), get_field(data, "l")),
+        email=get_field(data, "mail"),
+        company=get_field(data, "o"),
+        title=get_field(data, "title"),
+        phone_private=get_field(data, "homePhone", FrozenPhoneNumber),
+        phone_mobile=get_field(data, "mobile", FrozenPhoneNumber),
+        phone_business1=get_field(data, "telephoneNumber", FrozenPhoneNumber),
+        phone_business2=get_field(
+            data, "facsimileTelephoneNumber", FrozenPhoneNumber
+        ),
     )
 
 
@@ -175,10 +181,18 @@ def contact_from_vcard(vcard: Component) -> Contact:
             address, all_addresses = take_first_field(all_addresses)
 
     # Match organization
-    org: Optional[Union[str, List[str]]] = None
+    org: Optional[str] = None
     all_orgs: List[ValueAttrList] = get_fields(vcard, "org")
     if all_orgs:
-        org, all_orgs = take_first_field(all_orgs)
+        one_org: Union[str, List[str]]
+        one_org, all_orgs = take_first_field(all_orgs)
+        org = one_org if isinstance(one_org, str) else one_org.pop()
+
+    # Edge case:
+    # If we've got a company, but no name at all, switch both before import
+    if not any((first_name, last_name)) and org:
+        last_name = org
+        org = None
 
     # Match mail addresses
     mail: Optional[str] = None
@@ -207,23 +221,32 @@ def contact_from_vcard(vcard: Component) -> Contact:
             phone_home, all_phones = take_first_field(all_phones)
 
     # Build an actual contact object using all information
+    region: str = env.get("DEFAULT_REGION", "")
     return Contact(
-        first_name,
-        last_name,
-        (None, None)
-        if address is None
-        else (address.street, " ".join((address.code, address.city))),
-        mail,
-        org if not isinstance(org, list) else " ".join(org),
-        title,
-        None
-        if phone_home is None
-        else FrozenPhoneNumber(parse(phone_home, env["DEFAULT_REGION"])),
-        None
-        if phone_cell is None
-        else FrozenPhoneNumber(parse(phone_cell, env["DEFAULT_REGION"])),
-        None
-        if phone_work is None
-        else FrozenPhoneNumber(parse(phone_work, env["DEFAULT_REGION"])),
-        None,
+        first_name=first_name,
+        last_name=last_name,
+        address=(
+            (None, None)
+            if address is None
+            else (address.street, " ".join((address.code, address.city)))
+        ),
+        email=mail,
+        company=org,
+        title=title,
+        phone_private=(
+            None
+            if phone_home is None
+            else FrozenPhoneNumber(parse(phone_home, region))
+        ),
+        phone_mobile=(
+            None
+            if phone_cell is None
+            else FrozenPhoneNumber(parse(phone_cell, region))
+        ),
+        phone_business1=(
+            None
+            if phone_work is None
+            else FrozenPhoneNumber(parse(phone_work, region))
+        ),
+        phone_business2=None,
     )
