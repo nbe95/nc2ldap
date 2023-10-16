@@ -36,14 +36,22 @@ def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
                 parsed = value
             result.update({key: parsed})
 
+    # Edge case:
+    # If we've got a company, but no last name, switch both on LDAP side
+    last_name: str = contact.last_name or ""
+    company: Optional[str] = contact.company
+    if not last_name and company:
+        last_name = company
+        company = None
+
     result: Dict[str, str] = {}
     set_value(result, "givenName", contact.first_name)
-    set_value(result, "sn", contact.last_name or " ")  # not optional
+    set_value(result, "sn", last_name)
     set_value(result, "telephoneNumber", contact.phone_business1)
     set_value(result, "facsimileTelephoneNumber", contact.phone_business2)
     set_value(result, "mobile", contact.phone_mobile)
     set_value(result, "homePhone", contact.phone_private)
-    set_value(result, "o", contact.company)
+    set_value(result, "o", company)
     set_value(result, "street", contact.address[0])
     set_value(result, "l", contact.address[1])
     set_value(result, "title", contact.title)
@@ -63,7 +71,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
             return None
 
         # Extract value if wrapped in a list
-        value: str = wrapper_or_value
+        value: str
         if isinstance(wrapper_or_value, list):
             value = wrapper_or_value.pop()
             if wrapper_or_value:
@@ -71,6 +79,8 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
                     "LDAP key '%s' contains more than one value to extract.",
                     key,
                 )
+        else:
+            value = wrapper_or_value
         value = value.strip()
 
         if value_type == FrozenPhoneNumber:
@@ -81,16 +91,18 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
         return value
 
     return Contact(
-        get_field(data, "givenName"),
-        get_field(data, "sn") or None,
-        (get_field(data, "street"), get_field(data, "l")),
-        get_field(data, "mail"),
-        get_field(data, "o"),
-        get_field(data, "title"),
-        get_field(data, "homePhone", FrozenPhoneNumber),
-        get_field(data, "mobile", FrozenPhoneNumber),
-        get_field(data, "telephoneNumber", FrozenPhoneNumber),
-        get_field(data, "facsimileTelephoneNumber", FrozenPhoneNumber),
+        first_name=get_field(data, "givenName"),
+        last_name=get_field(data, "sn") or "",
+        address=(get_field(data, "street"), get_field(data, "l")),
+        email=get_field(data, "mail"),
+        company=get_field(data, "o"),
+        title=get_field(data, "title"),
+        phone_private=get_field(data, "homePhone", FrozenPhoneNumber),
+        phone_mobile=get_field(data, "mobile", FrozenPhoneNumber),
+        phone_business1=get_field(data, "telephoneNumber", FrozenPhoneNumber),
+        phone_business2=get_field(
+            data, "facsimileTelephoneNumber", FrozenPhoneNumber
+        ),
     )
 
 
@@ -175,10 +187,12 @@ def contact_from_vcard(vcard: Component) -> Contact:
             address, all_addresses = take_first_field(all_addresses)
 
     # Match organization
-    org: Optional[Union[str, List[str]]] = None
+    org: Optional[str] = None
     all_orgs: List[ValueAttrList] = get_fields(vcard, "org")
     if all_orgs:
-        org, all_orgs = take_first_field(all_orgs)
+        one_org: Union[str, List[str]]
+        one_org, all_orgs = take_first_field(all_orgs)
+        org = one_org if isinstance(one_org, str) else one_org.pop()
 
     # Match mail addresses
     mail: Optional[str] = None
@@ -208,7 +222,6 @@ def contact_from_vcard(vcard: Component) -> Contact:
 
     # Build an actual contact object using all information
     region: str = env.get("DEFAULT_REGION", "")
-    print(region)
     return Contact(
         first_name=first_name,
         last_name=last_name,
@@ -218,7 +231,7 @@ def contact_from_vcard(vcard: Component) -> Contact:
             else (address.street, " ".join((address.code, address.city)))
         ),
         email=mail,
-        company=org if not isinstance(org, list) else " ".join(org),
+        company=org,
         title=title,
         phone_private=(
             None
