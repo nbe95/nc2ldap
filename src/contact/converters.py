@@ -85,7 +85,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
 
         if value_type == FrozenPhoneNumber:
             try:
-                return parse(value)
+                return FrozenPhoneNumber(parse(value))
             except NumberParseException:
                 return None
         return value
