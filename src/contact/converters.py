@@ -207,23 +207,33 @@ def contact_from_vcard(vcard: Component) -> Contact:
             phone_home, all_phones = take_first_field(all_phones)
 
     # Build an actual contact object using all information
+    region: str = env.get("DEFAULT_REGION", "")
+    print(region)
     return Contact(
-        first_name,
-        last_name,
-        (None, None)
-        if address is None
-        else (address.street, " ".join((address.code, address.city))),
-        mail,
-        org if not isinstance(org, list) else " ".join(org),
-        title,
-        None
-        if phone_home is None
-        else FrozenPhoneNumber(parse(phone_home, env["DEFAULT_REGION"])),
-        None
-        if phone_cell is None
-        else FrozenPhoneNumber(parse(phone_cell, env["DEFAULT_REGION"])),
-        None
-        if phone_work is None
-        else FrozenPhoneNumber(parse(phone_work, env["DEFAULT_REGION"])),
-        None,
+        first_name=first_name,
+        last_name=last_name,
+        address=(
+            (None, None)
+            if address is None
+            else (address.street, " ".join((address.code, address.city)))
+        ),
+        email=mail,
+        company=org if not isinstance(org, list) else " ".join(org),
+        title=title,
+        phone_private=(
+            None
+            if phone_home is None
+            else FrozenPhoneNumber(parse(phone_home, region))
+        ),
+        phone_mobile=(
+            None
+            if phone_cell is None
+            else FrozenPhoneNumber(parse(phone_cell, region))
+        ),
+        phone_business1=(
+            None
+            if phone_work is None
+            else FrozenPhoneNumber(parse(phone_work, region))
+        ),
+        phone_business2=None,
     )
