@@ -18,7 +18,7 @@ from contact import (
     ("contact", "expected"),
     [
         (Contact(), {"sn": ""}),
-        (Contact("Noah", "Bettgen"), {"givenName": "Noah", "sn": "Bettgen"}),
+        (Contact("Joey", "Doe"), {"givenName": "Joey", "sn": "Doe"}),
         (
             Contact(
                 phone_private=FrozenPhoneNumber(parse("+49 5555 123")),
@@ -35,19 +35,19 @@ from contact import (
             },
         ),
         (
-            Contact(company="Black Cat & Paws Inc.", title="Verwöhnter Kater"),
+            Contact(company="Black Cat & Paws Inc.", title="Spoiled cat"),
             {
                 "sn": "Black Cat & Paws Inc.",
-                "title": "Verwöhnter Kater",
+                "title": "Spoiled cat",
             },
         ),
         (
-            Contact(address=("Ulrichstr. 3", "46519 Alpen")),
-            {"sn": "", "street": "Ulrichstr. 3", "l": "46519 Alpen"},
+            Contact(address=("Catstreet 42", "12345 Kittentown")),
+            {"sn": "", "street": "Catstreet 42", "l": "12345 Kittentown"},
         ),
         (
-            Contact(first_name="Noah", email="katze@katzenhaus.cat"),
-            {"sn": "", "givenName": "Noah", "mail": "katze@katzenhaus.cat"},
+            Contact(first_name="Joey", email="cat@cathouse.cat"),
+            {"sn": "", "givenName": "Joey", "mail": "cat@cathouse.cat"},
         ),
     ],
 )
@@ -63,8 +63,8 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
         ({}, Contact()),
         ({"sn": ""}, Contact()),
         (
-            {"givenName": ["Noah"], "sn": "Bettgen"},
-            Contact("Noah", "Bettgen"),
+            {"givenName": ["Joey"], "sn": "Doe"},
+            Contact("Joey", "Doe"),
         ),
         (
             {
@@ -81,16 +81,16 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
             ),
         ),
         (
-            {"o": "Black Cat & Paws Inc.", "title": ["Verwöhnter Kater"]},
-            Contact(company="Black Cat & Paws Inc.", title="Verwöhnter Kater"),
+            {"o": "Black Cat & Paws Inc.", "title": ["Spoiled cat"]},
+            Contact(company="Black Cat & Paws Inc.", title="Spoiled cat"),
         ),
         (
-            {"street": "Ulrichstr. 3", "l": ["46519 Alpen"]},
-            Contact(address=("Ulrichstr. 3", "46519 Alpen")),
+            {"street": "Catstreet 42", "l": ["12345 Kittentown"]},
+            Contact(address=("Catstreet 42", "12345 Kittentown")),
         ),
         (
-            {"givenName": "Noah", "mail": ["katze@katzenhaus.cat"]},
-            Contact(first_name="Noah", email="katze@katzenhaus.cat"),
+            {"givenName": "Joey", "mail": ["cat@cathouse.cat"]},
+            Contact(first_name="Joey", email="cat@cathouse.cat"),
         ),
     ],
 )
@@ -107,26 +107,26 @@ def test_ldap_to_contact(data: Dict[str, Any], expected: Contact) -> None:
             """
 BEGIN:VCARD
 VERSION:3.0
-N:Bettgen;Noah;;Verwöhnter Kater;
-FN:Noah Bettgen
+N:Doe;Joey;;Spoiled cat;
+FN:Joey Doe
 ORG:Black Cat & Paws Inc.;
-EMAIL;type=INTERNET;type=HOME;type=pref:katze@katzenhaus.cat
+EMAIL;type=INTERNET;type=HOME;type=pref:cat@cathouse.cat
 TEL;type=CELL;type=VOICE;type=pref:+49 5555 234
 TEL;type=WORK;type=VOICE:05555 345
 TEL;type=HOME;type=VOICE:+49 5555 123
 TEL;type=HOME;type=FAX:+49 5555 999
 TEL:+49 5555 888
-item1.ADR;type=HOME;type=pref:;;Ulrichstr. 3;Alpen;;46519;Deutschland
+item1.ADR;type=HOME;type=pref:;;Catstreet 42;Kittentown;;12345;Deutschland
 item1.X-ABADR:de
 END:VCARD
 """,
             Contact(
-                "Noah",
-                "Bettgen",
-                ("Ulrichstr. 3", "46519 Alpen"),
-                "katze@katzenhaus.cat",
+                "Joey",
+                "Doe",
+                ("Catstreet 42", "12345 Kittentown"),
+                "cat@cathouse.cat",
                 "Black Cat & Paws Inc.",
-                "Verwöhnter Kater",
+                "Spoiled cat",
                 FrozenPhoneNumber(parse("+49 5555 123")),
                 FrozenPhoneNumber(parse("+49 5555 234")),
                 FrozenPhoneNumber(parse("+49 5555 345")),
@@ -147,8 +147,8 @@ END:VCARD
             """
 BEGIN:VCARD
 VERSION:3.0
-N:Bettgen;Noah;;;
-FN:Noah Bettgen
+N:Doe;Joey;;;
+FN:Joey Doe
 TEL;type=VOICE:+49 5555 123
 TEL;type=CELL;type=VOICE:+49 5555 234
 TEL:+49 5555 345
@@ -156,8 +156,8 @@ TEL;type=FAX:+49 5555 999
 END:VCARD
 """,
             Contact(
-                first_name="Noah",
-                last_name="Bettgen",
+                first_name="Joey",
+                last_name="Doe",
                 phone_private=FrozenPhoneNumber(parse("+49 5555 123")),
                 phone_mobile=FrozenPhoneNumber(parse("+49 5555 234")),
             ),

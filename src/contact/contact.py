@@ -1,9 +1,10 @@
 """Module for system-independent contact management."""
 
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from os import environ as env
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
+from uuid import uuid4
 
 from phonenumbers import FrozenPhoneNumber
 
@@ -28,16 +29,14 @@ class Contact:
 
     def get_cn(self) -> str:
         """Build a CN based on this contact's data (full name or company)."""
-        result: str = " ".join(
-            (v or "" for v in (self.title, self.first_name, self.last_name))
-        ).strip()
-        if not result:
-            logger.error(
-                "Could not retreive a CN for %s with data fields: %s",
-                self,
-                asdict(self),
-            )
-        return result
+        fields: List[Optional[str]] = [
+            self.title,
+            self.first_name,
+            self.last_name,
+            f"({self.company})" if self.company else None,
+        ]
+        result: str = " ".join(v for v in fields if v).strip()
+        return result or str(uuid4())  # Always return a non-empty string!
 
     def __repr__(self) -> str:
         """Generate a serialized representation for nice log output."""
