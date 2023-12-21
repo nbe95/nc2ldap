@@ -1,8 +1,8 @@
-# Nextcloud to LDAP contacts
+# Nextcloud contacts to LDAP
 
 This is a simple Nextcloud plugin which serves all of a specific user's contacts
 as an LDAP phone book. It is meant to run in a standalone Docker container and
-act as a simple "backend" for desktop SIP phones. In my case, that's an old and
+act as a simple "backend" for desktop SIP phones; in my case, that's an old and
 inexpensive *OpenStage 40* telephone. The plugin runs its own OpenLDAP server
 and imports all contacts' data on a periodical basis.
 
@@ -11,15 +11,15 @@ and imports all contacts' data on a periodical basis.
 ### Hardware
 
 > Note: This section describes my very own setup using an *OpenStage 40* desktop
-phone. Use for inspiration and at your own risk. :wink:
+phone. Use for inspiration purposes and, as usual, at your own risk. :wink:
 
 In order to tell our desktop phone which data fields to have a look on, an
 [LDAP profile file](./os40-ldap-profile.txt) must be transferred via FTP onto
 the phone once. Use the http admin interface for that and refer to the manual
 for further information.
 
-The easiest method is to setup a local Docker container (mind the :z-flags for
-SELinux!), for example:
+The easiest method is to setup a local Docker container (mind the `:z` flag for
+SELinux), for example:
 
 ```sh
 docker run -d \
@@ -58,8 +58,8 @@ Additionally, the LDAP server data and credentials must be configured once using
 ### Software
 
 In order to make this plugin work, you will want to create a Nextcloud app
-token, which has no direct file access, instead of using your plain credentials.
-:slightly_smiling_face:
+token, which has no direct file access, instead of using your plain
+credentials. :innocent:
 
 This ensures that we can grab contact data without damaging any of your
 Nextcloud files. Visit `{NEXTCLOUD_URL}/settings/user/security` and scroll down
