@@ -31,7 +31,7 @@ docker run -d \
   nbe95/nc2ldap
 ```
 
-If the container dies instantly, check the logs and make sure that your
+If the container dies instantly, check its logs and make sure that your
 environment file contains correct and plausible values.
 
 **Important:** The plugin is designed to run in your *local network*. A simple
@@ -39,11 +39,11 @@ password is required to access any data on the LDAP server. However, there's no
 effort put into extra layers of data security, authentication, TLS etc. Do not
 publish any part of this service to the outside world.
 
-> :bulb: If you're using a Fritzbox as SIP server and your phone is not smart
-enough (like mine) to actively look up an incoming caller, you may consider
-synchronizing your Nextcloud contacts to a dedicated Fritzbox phonebook as well.
-Then, the Fritzbox itself will recognize any known caller number and support the
-name of the caller directly to the phone via SIP protocol - genius!
+> :information_source: If you're using a Fritzbox as SIP server and your phone
+is not smart enough (like mine) to actively look up an incoming caller, you may
+consider synchronizing your Nextcloud contacts to a dedicated Fritzbox phonebook
+as well. Then, the Fritzbox itself will recognize any known caller number and
+support the name of the caller directly to the phone via SIP protocol - genius!
 
 ## Prerequisites
 
