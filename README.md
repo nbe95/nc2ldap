@@ -2,23 +2,23 @@
 
 This is a simple Nextcloud plugin which serves all of a specific user's contacts
 as an LDAP phone book. It is meant to run in a standalone Docker container and
-act as a simple "backend" for desk SIP phones which, in my case, is an old and
-inexpensive *OpenStage 40* SIP telephone.
+act as a simple "backend" for desk SIP phones with LDAP support which, in my
+case, is an old and inexpensive *OpenStage 40* SIP telephone.
 
 The plugin runs its own OpenLDAP server and imports all contacts' data on a
 periodical basis. With the plugin running in the background and syncing contacts
-once per day from a single source of truth (i.e. your Nextcloud instance
-:wink:), your desk phone can connect to its LDAP endpoint via network. It then
-will be able to always provide the most recent names and phone numbers of your
-contacts and dial them directly. Also, it may look up any incoming call and
-present the caller name on the display, if it is known.
+once per day from a single source of truth (i.e. your Nextcloud instance), your
+desk phone can connect to its LDAP endpoint via network. It then will be able to
+always provide the most recent names and phone numbers of your contacts and dial
+them directly. Also, it may look up any incoming call and present the caller
+name on the display, if it is known.
 
 ## Quick start
 
 The server needs a bunch of config values to function properly, which can and
 should be stored in an `.env` file. See and adapt the
 [.env file template](./.env.template) to fit your needs. Also, check out the
-[Software section](#software) below.
+[software prerequisites](#software) below.
 
 Then, you're ready to go:
 
@@ -46,6 +46,20 @@ Then, the Fritzbox itself will recognize any known caller number and support the
 name of the caller directly to the phone via SIP protocol - genius!
 
 ## Prerequisites
+
+### Software
+
+In order to make this plugin work, you will want to create a Nextcloud app
+token, which has no direct file access, instead of using your plain
+credentials. :innocent:
+
+This ensures that we can grab contact data without damaging any of your
+Nextcloud files. Visit `{NEXTCLOUD_URL}/settings/user/security` and scroll down
+to create a new token with the name "nc2ldap". Save the user name and the
+password in the corresponding fields within the `.env` file.
+
+> :bulb: If file-not-found related problems arise, try to **capitalize the user
+name**.
 
 ### Hardware
 
@@ -94,20 +108,6 @@ Additionally, the LDAP server data and credentials must be configured once using
 
 > Note: The default admin PIN for accessing the web interface is `123456`.
 
-### Software
-
-In order to make this plugin work, you will want to create a Nextcloud app
-token, which has no direct file access, instead of using your plain
-credentials. :innocent:
-
-This ensures that we can grab contact data without damaging any of your
-Nextcloud files. Visit `{NEXTCLOUD_URL}/settings/user/security` and scroll down
-to create a new token with the name "nc2ldap". Save the user name and the
-password in the corresponding fields within the `.env` file.
-
-> :bulb: If file-not-found related problems arise, try to **capitalize the user
-name**.
-
 ## Build and run
 
 ### Linting and formatting
@@ -143,7 +143,7 @@ docker build -t nbe95/nc2ldap .
 docker run -d --name nc2ldap -p 389:389 --env-file ./.env nbe95/nc2ldap
 ```
 
-## LDAP debugging
+### LDAP debugging
 
 For debugging, I recommend the great
 [phpLDAPadmin tool](https://github.com/osixia/docker-phpLDAPadmin), which also
