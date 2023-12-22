@@ -12,6 +12,7 @@ on:
 
 jobs:
   lint:
+    name: Lint the Python code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +31,7 @@ jobs:
         run: tox -e lint
 
   test:
+    name: Test the Python code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +74,7 @@ jobs:
           major-label: major
           minor-label: minor
           patch-label: patch
-          noop-labels: []
+          noop-labels: ""
           require-release-notes: false
           base-branch: true
           with-v: true
