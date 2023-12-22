@@ -7,7 +7,7 @@ from typing import Set
 
 from schedule import every, repeat, run_pending
 
-from constants import DEBUG, LOG_LEVEL
+from constants import LOG_LEVEL, VERSION
 from contact import Contact
 from ldap import PhoneBook
 from nextcloud import AddressBook
@@ -19,14 +19,14 @@ logger.setLevel(LOG_LEVEL)
 
 def main():
     """Run main entry point."""
+    logger.info("Starting nc2ldap v%s.", VERSION)
     logger.info(
         "Setting up task scheduler to run every day at %s.",
         env["IMPORT_TIME"],
     )
 
-    # If running in debug mode, instantly perform an import once
-    if DEBUG:
-        do_import()
+    # Perform an import once after start-up
+    do_import()
     while True:
         run_pending()
         sleep(1)
