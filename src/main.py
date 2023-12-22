@@ -25,9 +25,8 @@ def main():
         env["IMPORT_TIME"],
     )
 
-    # If running in debug mode, instantly perform an import once
-    if DEBUG:
-        do_import()
+    # Perform an import once after start-up
+    do_import()
     while True:
         run_pending()
         sleep(1)
