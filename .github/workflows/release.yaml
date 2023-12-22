@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: nc2ldap
+  IMAGE_NAME: nbe95/nc2ldap
 
 jobs:
   bump-tag-version:
@@ -53,4 +53,6 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.bump-tag-version.outputs.version }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ needs.bump-tag-version.outputs.version }}
+            ${{ env.IMAGE_NAME }}:latest
