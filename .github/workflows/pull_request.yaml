@@ -1,14 +1,17 @@
-name: Linting and testing
+name: Lint and test
+
 on:
   pull_request:
     types:
+      - labeled
+      - unlabeled
       - opened
       - reopened
       - synchronize
       - ready_for_review
 
 jobs:
-  Lint:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +29,7 @@ jobs:
       - name: Run tox
         run: tox -e lint
 
-  Test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,3 +58,21 @@ jobs:
           path: test-results.xml
           summary: true
           display-options: A  # report all tests
+
+  validate-release:
+    name: Validate release label and notes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jefflinse/pr-semver-bump@v1.6.0
+        name: Bump and tag new version
+        with:
+          mode: validate
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          major-label: major
+          minor-label: minor
+          patch-label: patch
+          noop-labels: []
+          require-release-notes: false
+          base-branch: true
+          with-v: true

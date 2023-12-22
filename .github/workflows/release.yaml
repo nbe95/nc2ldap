@@ -1,0 +1,25 @@
+name: Create release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump-tag-version:
+    name: Bump and tag new version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jefflinse/pr-semver-bump@v1.6.0
+        name: Bump and tag new version
+        with:
+          mode: bump
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          major-label: major
+          minor-label: minor
+          patch-label: patch
+          noop-labels: []
+          require-release-notes: false
+          base-branch: true
+          with-v: true
