@@ -40,6 +40,9 @@ jobs:
     needs: [bump-tag-version]
     steps:
       - uses: actions/checkout@v4
+      - name: Determine fixed version
+        run: |
+          sed -i "/^VERSION.\+/s/\".*\"/\"${{ needs.bump-tag-version.outputs.version }}\"/" ./src/constants.py
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
