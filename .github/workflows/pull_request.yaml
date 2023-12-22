@@ -77,4 +77,4 @@ jobs:
           noop-labels: ""
           require-release-notes: false
           base-branch: true
-          with-v: true
+          with-v: false

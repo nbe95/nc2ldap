@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  IMAGE_NAME: nc2ldap
+
 jobs:
   bump-tag-version:
     name: Bump and tag new version
@@ -13,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: jefflinse/pr-semver-bump@v1.6.0
         name: Bump and tag new version
+        id: semver
         with:
           mode: bump
           repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -22,4 +26,24 @@ jobs:
           noop-labels: ""
           require-release-notes: false
           base-branch: true
-          with-v: true
+          with-v: false
+
+  create-docker-image:
+    name: Build and publish Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.semver.outputs.version }}
