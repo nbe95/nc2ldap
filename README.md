@@ -3,24 +3,41 @@
 This is a simple Nextcloud plugin which serves all of a specific user's contacts
 as an LDAP phone book. It is meant to run in a standalone Docker container and
 act as a simple "backend" for desk SIP phones which, in my case, is an old and
-inexpensive *OpenStage 40* telephone.
+inexpensive *OpenStage 40* SIP telephone.
 
 The plugin runs its own OpenLDAP server and imports all contacts' data on a
 periodical basis. With the plugin running in the background and syncing contacts
-once per day, my desk phone always provides the most recent names and phone
-numbers of my contacts, which I can dial directly. Also, it will look up any
-incoming call and present the caller name on the display, if it is known.
+once per day from a single source of truth (i.e. your Nextcloud instance
+:wink:), your desk phone can connect to its LDAP endpoint via network. It then
+will be able to always provide the most recent names and phone numbers of your
+contacts and dial them directly. Also, it may look up any incoming call and
+present the caller name on the display, if it is known.
 
-**Important notes:**
+## Quick start
 
-* The plugin is designed to run in your *local network*. A simple password is
-required to access any data on the LDAP server. However, there's no effort put
-into extra layers of data security, authentication, TLS etc. Do not publish any
-part of this service to the outside world.
-* The server needs a bunch of config values to function properly, which can and
+The server needs a bunch of config values to function properly, which can and
 should be stored in an `.env` file. See and adapt the
 [.env file template](./.env.template) to fit your needs. Also, check out the
 [Software section](#software) below.
+
+Then, you're ready to go:
+
+```sh
+docker run -d \
+  --name nc2ldap \
+  --env-file ./.env \
+  --restart unless-stopped \
+  -p 389:389 \
+  nbe95/nc2ldap
+```
+
+If the container dies instantly, check the logs and make sure that your
+environment file contains correct and plausible values.
+
+**Important:** The plugin is designed to run in your *local network*. A simple
+password is required to access any data on the LDAP server. However, there's no
+effort put into extra layers of data security, authentication, TLS etc. Do not
+publish any part of this service to the outside world.
 
 > :bulb: If you're using a Fritzbox as SIP server and your phone is not smart
 enough (like mine) to actively look up an incoming caller, you may consider
