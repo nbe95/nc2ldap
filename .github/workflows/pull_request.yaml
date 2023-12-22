@@ -1,0 +1,79 @@
+name: Lint and test
+
+on:
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+  lint:
+    name: Lint the Python code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up OpenLDAP build prerequisites
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: python3-dev libldap2-dev libsasl2-dev slapd ldap-utils
+          version: 1.0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install tox
+        run: pip install tox
+      - name: Run tox
+        run: tox -e lint
+
+  test:
+    name: Test the Python code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up OpenLDAP build prerequisites
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: python3-dev libldap2-dev libsasl2-dev slapd ldap-utils
+          version: 1.0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+      - name: Test with pytest
+        run: |
+          pip install pytest pytest-env
+          pytest tests/ --doctest-modules --junitxml=test-results.xml
+      - name: Surface test results
+        # Use always() to always run this step to publish test results when there are test failures
+        if: always()
+        uses: pmeier/pytest-results-action@main
+        with:
+          path: test-results.xml
+          summary: true
+
+  validate-release:
+    name: Validate release label and notes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jefflinse/pr-semver-bump@v1.6.0
+        name: Bump and tag new version
+        with:
+          mode: validate
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          major-label: major
+          minor-label: minor
+          patch-label: patch
+          noop-labels: ""
+          require-release-notes: false
+          base-branch: true
+          with-v: false
