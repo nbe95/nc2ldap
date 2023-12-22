@@ -1,4 +1,4 @@
-name: Lint and test the Python code
+name: Linting and testing
 on:
   pull_request:
     types:
@@ -46,7 +46,7 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest pytest-env
-          pytest --doctest-modules --junitxml=junit/test-results.xml
+          pytest tests/ --doctest-modules --junitxml=junit/test-results.xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:
