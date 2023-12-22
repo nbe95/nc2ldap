@@ -54,3 +54,4 @@ jobs:
         with:
           path: test-results.xml
           summary: true
+          display-options: A  # report all tests
