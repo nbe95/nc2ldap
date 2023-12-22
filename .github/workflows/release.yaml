@@ -1,4 +1,4 @@
-name: Create release
+name: Create and publish release
 
 on:
   push:
@@ -12,6 +12,10 @@ jobs:
   bump-tag-version:
     name: Bump and tag new version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
       - uses: jefflinse/pr-semver-bump@v1.6.0
