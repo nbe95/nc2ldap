@@ -46,4 +46,4 @@ fi
 start_server
 
 # Start main script
-/usr/bin/env python3 -u /nc2ldap/main.py
+/usr/bin/env python3 -u /nc2ldap/src/main.py
