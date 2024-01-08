@@ -20,4 +20,8 @@ RUN apt-get update \
 RUN python -m pip install -r ./requirements.txt
 
 COPY entrypoint.sh /
+
+ARG VERSION
+ENV VERSION ${VERSION}
+
 ENTRYPOINT [ "/entrypoint.sh" ]
