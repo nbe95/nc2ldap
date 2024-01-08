@@ -3,6 +3,6 @@
 import logging
 from os import environ
 
-VERSION: str = "<unknown>"
+VERSION: str = environ.get("VERSION", "")
 DEBUG: bool = bool(environ.get("DEBUG"))
 LOG_LEVEL: int = logging.DEBUG if DEBUG else logging.INFO
