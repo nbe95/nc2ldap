@@ -16,14 +16,11 @@ logger.setLevel(LOG_LEVEL)
 class AddressBook:
     """A WebDAV client to read our Nextcloud address book."""
 
-    def __init__(
-        self, host: str, address_book: str, username: str, app_token: str
-    ):
+    def __init__(self, host: str, address_book: str, username: str, app_token: str):
         """Create a WebDAV client and connect to the Nextcloud instance."""
         self.client: Client = Client(host, auth=(username.lower(), app_token))
         self.webdav_path: str = (
-            "/remote.php/dav/addressbooks/users/"
-            f"{username}/{address_book.lower()}"
+            "/remote.php/dav/addressbooks/users/" f"{username}/{address_book.lower()}"
         )
         logger.info("Connected WebDAV client to Nextcloud instance %s.", host)
 

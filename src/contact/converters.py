@@ -2,20 +2,14 @@
 
 import logging
 from dataclasses import dataclass
-from os import environ as env
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-from phonenumbers import (
-    FrozenPhoneNumber,
-    PhoneNumberFormat,
-    format_number,
-    parse,
-)
+from phonenumbers import FrozenPhoneNumber, PhoneNumberFormat, format_number, parse
 from phonenumbers.phonenumberutil import NumberParseException
 from vobject.base import Component
 from vobject.vcard import Address
 
-from constants import LOG_LEVEL
+from constants import DEFAULT_REGION, LOG_LEVEL
 
 from .contact import Contact
 
@@ -26,9 +20,7 @@ logger.setLevel(LOG_LEVEL)
 def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
     """Create a data record an LDAP server can handle."""
 
-    def set_value(
-        result: Dict[str, str], key: str, value: Optional[Any]
-    ) -> None:
+    def set_value(result: Dict[str, str], key: str, value: Optional[Any]) -> None:
         """Add all set values to the result dictionary and format them."""
         if value is not None:
             parsed: str
@@ -56,9 +48,7 @@ def contact_to_ldap_dict(contact: Contact) -> Dict[str, str]:
 def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
     """Create a contact based on data from an LDAP server."""
 
-    def get_field(
-        attr: Dict[str, Any], key: str, value_type: Type[Any] = str
-    ) -> Optional[Any]:
+    def get_field(attr: Dict[str, Any], key: str, value_type: Type[Any] = str) -> Optional[Any]:
         """Fetch/cast an LDAP attribute, which might be wrapped in a list."""
         wrapper_or_value: Optional[Union[List[str], str]] = attr.get(key)
         if wrapper_or_value is None:
@@ -94,9 +84,7 @@ def contact_from_ldap_dict(data: Dict[str, Any]) -> Contact:
         phone_private=get_field(data, "homePhone", FrozenPhoneNumber),
         phone_mobile=get_field(data, "mobile", FrozenPhoneNumber),
         phone_business1=get_field(data, "telephoneNumber", FrozenPhoneNumber),
-        phone_business2=get_field(
-            data, "facsimileTelephoneNumber", FrozenPhoneNumber
-        ),
+        phone_business2=get_field(data, "facsimileTelephoneNumber", FrozenPhoneNumber),
     )
 
 
@@ -129,9 +117,7 @@ def contact_from_vcard(vcard: Component) -> Contact:
         fields: List[ValueAttrList], attr: str
     ) -> Tuple[Any, List[ValueAttrList]]:
         """Assign a specific value with attribute matching criteria."""
-        filtered: List[ValueAttrList] = list(
-            filter(lambda x: x.has_attr(attr), fields)
-        )
+        filtered: List[ValueAttrList] = list(filter(lambda x: x.has_attr(attr), fields))
         if not filtered:
             return (None, fields)
 
@@ -221,7 +207,6 @@ def contact_from_vcard(vcard: Component) -> Contact:
             phone_home, all_phones = take_first_field(all_phones)
 
     # Build an actual contact object using all information
-    region: str = env.get("DEFAULT_REGION", "")
     return Contact(
         first_name=first_name,
         last_name=last_name,
@@ -234,19 +219,13 @@ def contact_from_vcard(vcard: Component) -> Contact:
         company=org,
         title=title,
         phone_private=(
-            None
-            if phone_home is None
-            else FrozenPhoneNumber(parse(phone_home, region))
+            None if phone_home is None else FrozenPhoneNumber(parse(phone_home, DEFAULT_REGION))
         ),
         phone_mobile=(
-            None
-            if phone_cell is None
-            else FrozenPhoneNumber(parse(phone_cell, region))
+            None if phone_cell is None else FrozenPhoneNumber(parse(phone_cell, DEFAULT_REGION))
         ),
         phone_business1=(
-            None
-            if phone_work is None
-            else FrozenPhoneNumber(parse(phone_work, region))
+            None if phone_work is None else FrozenPhoneNumber(parse(phone_work, DEFAULT_REGION))
         ),
         phone_business2=None,
     )

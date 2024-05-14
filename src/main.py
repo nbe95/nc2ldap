@@ -1,13 +1,24 @@
 """Main app for Nextcloud to LDAP contact exporter."""
 
 import logging
-from os import environ as env
 from time import sleep
 from typing import Set
 
 from schedule import every, repeat, run_pending
 
-from constants import LOG_LEVEL, VERSION
+from constants import (
+    LDAP_ADMIN_PASSWORD,
+    LDAP_ADMIN_USER,
+    LDAP_HOST,
+    LDAP_PHONE_BOOK,
+    LOG_LEVEL,
+    NEXTCLOUD_ADDRESS_BOOK,
+    NEXTCLOUD_APP_TOKEN,
+    NEXTCLOUD_HOST,
+    NEXTCLOUD_SYNC_TIME,
+    NEXTCLOUD_USER,
+    VERSION,
+)
 from contact import Contact
 from ldap import PhoneBook
 from nextcloud import AddressBook
@@ -20,10 +31,7 @@ logger.setLevel(LOG_LEVEL)
 def main():
     """Run main entry point."""
     logger.info("Starting nc2ldap v%s.", VERSION)
-    logger.info(
-        "Setting up task scheduler to run every day at %s.",
-        env["IMPORT_TIME"],
-    )
+    logger.info("Setting up task scheduler to run every day at %s.", NEXTCLOUD_SYNC_TIME)
 
     # Perform an import once after start-up
     do_import()
@@ -32,24 +40,22 @@ def main():
         sleep(1)
 
 
-@repeat(every().day.at(env["IMPORT_TIME"]))
+@repeat(every().day.at(NEXTCLOUD_SYNC_TIME))
 def do_import():
     """Import and update all Nextcloud contacts to the local LDAP server."""
     logger.info("Importing Nextcloud address book.")
     nc_address_book: AddressBook = AddressBook(
-        env["NEXTCLOUD_HOST"],
-        env["NEXTCLOUD_ADDRESS_BOOK"],
-        env["NEXTCLOUD_USER"],
-        env["NEXTCLOUD_APP_TOKEN"],
+        NEXTCLOUD_HOST,
+        NEXTCLOUD_ADDRESS_BOOK,
+        NEXTCLOUD_USER,
+        NEXTCLOUD_APP_TOKEN,
     )
     nc_contacts: Set[Contact] = nc_address_book.get_contacts()
     logger.info("Found %i upstream contacts.", len(nc_contacts))
 
     logger.info("Gathering data from local LDAP phone book.")
-    ldap_phone_book: PhoneBook = PhoneBook(
-        env["LDAP_HOST"], env["LDAP_PHONE_BOOK"]
-    )
-    ldap_phone_book.login(env["LDAP_ADMIN_USER"], env["LDAP_ADMIN_PASSWORD"])
+    ldap_phone_book: PhoneBook = PhoneBook(LDAP_HOST, LDAP_PHONE_BOOK)
+    ldap_phone_book.login(LDAP_ADMIN_USER, LDAP_ADMIN_PASSWORD)
     ldap_phone_book.create()
     ldap_contacts: Set[Contact] = ldap_phone_book.get_contacts()
     logger.info("Found %i local contacts.", len(ldap_contacts))

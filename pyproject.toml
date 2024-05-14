@@ -1,18 +1,30 @@
 [tool.black]
-line-length=79
+line-length = 100
 
-[tool.mypy]
-ignore_missing_imports = true
-check_untyped_defs = true
-warn_unused_ignores = true
+[tool.flake8]
+max-line-length = 100
+
+[tool.pylint.DESIGN]
+max-args = 10
+max-attributes = 10
 
 [tool.pylint.'MESSAGES CONTROL']
-disable = "too-many-instance-attributes"
+disable = [
+    "too-few-public-methods",
+    "too-many-instance-attributes"
+]
+
+[tool.pydocstyle]
+ignore = "D105,D107,D203,D213"
+
+[tool.mypy]
+python_version = 3.11
+mypy_path = "src"
+check_untyped_defs = true
+ignore_missing_imports = true
+ignore_missing_imports_per_module = true
+warn_unused_ignores = true
 
 [tool.pytest.ini_options]
-pythonpath = [
-  ".", "src",
-]
-env = [
-  "DEFAULT_REGION = DE"
-]
+pythonpath = [ ".", "src" ]
+env = [ "DEFAULT_REGION = DE" ]

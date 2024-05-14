@@ -1,9 +1,11 @@
 # Nextcloud contacts to LDAP
 
 This is a simple Nextcloud plugin which serves all of a specific user's contacts
-as an LDAP phone book. It is meant to run in a standalone Docker container and
+as an LDAP phone book. It is meant to run in a **standalone Docker container** and
 act as a simple "backend" for desk SIP phones with LDAP support which, in my
 case, is an old and inexpensive *OpenStage 40* SIP telephone.
+
+![Functional overview](./doc/nc2ldap.svg)
 
 The plugin runs its own OpenLDAP server and imports all contacts' data on a
 periodical basis. With the plugin running in the background and syncing contacts
@@ -11,7 +13,7 @@ once per day from a single source of truth (i.e. your Nextcloud instance), your
 desk phone can connect to its LDAP endpoint via network. It then will be able to
 always provide the most recent names and phone numbers of your contacts and dial
 them directly. Also, it may look up any incoming call and present the caller
-name on the display, if it is known.
+name on the display, if they're known.
 
 ## Quick start
 
@@ -32,18 +34,20 @@ docker run -d \
 ```
 
 If the container dies instantly, check its logs and make sure that your
-environment file contains correct and plausible values.
+environment file contains correct and plausible values, especially for the
+Nextcloud upstream credentials.
 
-**Important:** The plugin is designed to run in your *local network*. A simple
+**Important:** The plugin is designed to run *in your local network*. A simple
 password is required to access any data on the LDAP server. However, there's no
 effort put into extra layers of data security, authentication, TLS etc. Do not
 publish any part of this service to the outside world.
 
-> :information_source: If you're using a Fritzbox as SIP server and your phone
-is not smart enough (like mine) to actively look up an incoming caller, you may
-consider synchronizing your Nextcloud contacts to a dedicated Fritzbox phonebook
-as well. Then, the Fritzbox itself will recognize any known caller number and
-support the name of the caller directly to the phone via SIP protocol - genius!
+> :information_source: If you're using a **Fritzbox as SIP server** and your
+phone is not smart enough (like mine) to actively look up an incoming caller,
+you may consider synchronizing your Nextcloud contacts to a dedicated Fritzbox
+phone book as well. Then, the Fritzbox itself will recognize any known caller
+number and support the name of the caller directly to the phone via SIP
+protocol - genius!
 
 ## Prerequisites
 
@@ -135,26 +139,21 @@ about installing the package from source.
 With each new release, the latest image will be automatically published to
 [Docker Hub](https://hub.docker.com/r/nbe95/nc2ldap).
 
-To build and run an image locally, execute the following commands. Ensure you
-have populated an `.env` file with proper values (see `.env.template`).
-
-```sh
-docker build -t nbe95/nc2ldap .
-docker run -d --name nc2ldap -p 389:389 --env-file ./.env nbe95/nc2ldap
-```
+To build and run an image locally, execute `docker build -t nbe95/nc2ldap .` in
+the root directory. Ensure you have populated an `.env` file with proper values
+(see `.env.template`).
 
 ### LDAP debugging
 
-For debugging, I recommend the great
-[phpLDAPadmin tool](https://github.com/osixia/docker-phpLDAPadmin), which also
+For debugging, I recommend the great tool
+[phpLDAPadmin](https://github.com/osixia/docker-phpLDAPadmin), which also
 comes in a Docker container. Simply attach a local running instance to the
 target host and have fun!
 
 ```sh
-TARGET=$(hostname -I)
 docker run -d --name phpldapadmin \
   -p 6080:80 \
-  -e PHPLDAPADMIN_LDAP_HOSTS=$TARGET \
+  -e PHPLDAPADMIN_LDAP_HOSTS=$(hostname -I) \
   -e PHPLDAPADMIN_HTTPS=false \
   osixia/phpldapadmin:0.9.0
 ```
