@@ -6,12 +6,7 @@ import pytest
 from phonenumbers import FrozenPhoneNumber, parse
 from vobject.base import Component, readOne
 
-from contact import (
-    Contact,
-    contact_from_ldap_dict,
-    contact_from_vcard,
-    contact_to_ldap_dict,
-)
+from contact import Contact, contact_from_ldap_dict, contact_from_vcard, contact_to_ldap_dict
 
 
 @pytest.mark.parametrize(
@@ -92,9 +87,7 @@ def test_contact_to_ldap(contact: Contact, expected: Dict[str, Any]) -> None:
         ),
         (
             {"street": "Catstreet 42", "l": ["12345 Kittentown"]},
-            Contact(
-                last_name="<???>", address=("Catstreet 42", "12345 Kittentown")
-            ),
+            Contact(last_name="<???>", address=("Catstreet 42", "12345 Kittentown")),
         ),
         (
             {"givenName": "Joey", "mail": ["cat@cathouse.cat"]},
