@@ -1,9 +1,9 @@
-FROM python:3-bullseye
+FROM python:3.11-bullseye
 
-RUN mkdir -p /nc2ldap
-WORKDIR /nc2ldap
+RUN mkdir -p /app
+WORKDIR /app
 
-
+# Install required LDAP dependencies
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         slapd \
@@ -16,13 +16,19 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
-RUN python -m pip install -r ./requirements.txt
+# Set up pdm and install Python dependencies
+ENV PDM_CHECK_UPDATE=false
+RUN pip install -U pdm
+COPY pyproject.toml pdm.lock README.md /app/
+COPY src/ /app/src
 
-COPY src/ src/
+RUN pdm install --check --prod --no-editable
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Apply custom entrypoint
 COPY entrypoint.sh /
 
 ARG VERSION
-ENV VERSION ${VERSION}
+ENV VERSION=${VERSION}
 
 ENTRYPOINT [ "/entrypoint.sh" ]

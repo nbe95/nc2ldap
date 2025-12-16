@@ -9,9 +9,11 @@ start_server() {
 
 reconfigure_slapd() {
     # Customize slapd instance by running dpkg-reconfigure non-interactively
-    ORGANIZATION="$LDAP_ORGANIZATION"
-    DOMAIN="$LDAP_DOMAIN"
-    ADMIN_PW="$LDAP_ADMIN_PASSWORD"
+    echo "Reconfiguring slapd... this may take a minute."
+
+    ORGANIZATION="${LDAP_ORGANIZATION:-MyOrganization}"
+    DOMAIN="${LDAP_DOMAIN:-mytld.com}"
+    ADMIN_PW="${LDAP_ADMIN_PASSWORD:-admin}"
 
     touch ./slapd.conf
     echo "slapd slapd/password1 password $ADMIN_PW" >> ./slapd.conf
@@ -38,7 +40,7 @@ reconfigure_slapd() {
 
 
 # Run slapd reconfiguration once at runtime (!)
-init_file=/nc2ldap/.slapd_init_done
+init_file=/app/.slapd_init_done
 if [ ! -e "$init_file" ]; then
     reconfigure_slapd
     touch "$init_file"
@@ -46,4 +48,5 @@ fi
 start_server
 
 # Start main script
-/usr/bin/env python3 -u /nc2ldap/src/main.py
+echo "Starting nc2ldap application."
+python -u -m nc2ldap.main

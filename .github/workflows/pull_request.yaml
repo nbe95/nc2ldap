@@ -16,49 +16,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up OpenLDAP build prerequisites
-        uses: awalsh128/cache-apt-pkgs-action@latest
+      - name: Setup pdm
+        uses: pdm-project/setup-pdm@v4
         with:
-          packages: python3-dev libldap2-dev libsasl2-dev slapd ldap-utils
-          version: 1.0
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-      - name: Install tox
-        run: pip install tox
-      - name: Run tox
-        run: tox -e lint
+          python-version: 3.11
+          cache: true
+      - name: Install dependencies
+        run: pdm install
+      - name: Lint code
+        run: pdm run lint
 
   test:
     name: Test the Python code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
-      - name: Set up OpenLDAP build prerequisites
-        uses: awalsh128/cache-apt-pkgs-action@latest
+      - name: Setup pdm
+        uses: pdm-project/setup-pdm@v4
         with:
-          packages: python3-dev libldap2-dev libsasl2-dev slapd ldap-utils
-          version: 1.0
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+          python-version: 3.11
+          cache: true
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Test with pytest
-        run: |
-          pip install pytest pytest-env
-          pytest tests/ --doctest-modules --junitxml=test-results.xml
-      - name: Surface test results
-        # Use always() to always run this step to publish test results when there are test failures
-        if: always()
-        uses: pmeier/pytest-results-action@main
+        run: pdm install
+      - name: Run tests
+        run: pdm run pytest --junitxml=report.xml
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}       # run this step even if previous step failed
         with:
-          path: test-results.xml
-          summary: true
+          name: pytest test results
+          path: report.xml
+          reporter: java-junit
 
   validate-release:
     name: Validate release label and notes

@@ -6,7 +6,12 @@ import pytest
 from phonenumbers import FrozenPhoneNumber, parse
 from vobject.base import Component, readOne
 
-from contact import Contact, contact_from_ldap_dict, contact_from_vcard, contact_to_ldap_dict
+from nc2ldap.contact import (
+    Contact,
+    contact_from_ldap_dict,
+    contact_from_vcard,
+    contact_to_ldap_dict,
+)
 
 
 @pytest.mark.parametrize(

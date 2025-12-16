@@ -1,3 +1,52 @@
+[project]
+name = "nc2ldap"
+dynamic = ["version"]
+description = "Nextcloud add-on, which serves your Nextcloud phone book as an LDAP server, for use with SIP desktop phones."
+authors = [
+    {name = "Niklas Bettgen", email = "niklas@bettgen.de"},
+]
+dependencies = [
+    "ldap3==2.9.1",
+    "phonenumbers==8.13.22",
+    "vobject==0.9.6.1",
+    "webdav4==0.9.8",
+    "schedule>=1.2.2",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[dependency-groups]
+dev = [
+    "types-ldap3>=2.9.13.20251121",
+    "types-vobject>=0.9.9.20250708",
+    "flake8>=7.3.0",
+    "pylint>=4.0.4",
+    "mypy>=1.19.1",
+    "isort>=7.0.0",
+    "pydocstyle>=6.3.0",
+    "black>=25.12.0",
+    "pytest>=9.0.2",
+    "Flake8-pyproject>=1.2.4",
+    "pytest-env>=1.2.0",
+]
+
+[tool.pdm]
+self-install = true
+distribution = true
+
+[tool.pdm.scripts]
+format.composite = [
+    "isort ./src/nc2ldap",
+    "black ./src/nc2ldap"
+]
+lint.composite = [
+    "flake8 ./src/nc2ldap",
+    "mypy ./src/nc2ldap",
+    "pylint ./src/nc2ldap"
+]
+test = "pytest ./src/nc2ldap"
+
 [tool.black]
 line-length = 100
 
@@ -8,7 +57,7 @@ max-line-length = 100
 max-args = 10
 max-attributes = 10
 
-[tool.pylint.'MESSAGES CONTROL']
+[tool.pylint.messages_control]
 disable = [
     "too-few-public-methods",
     "too-many-instance-attributes"
@@ -28,3 +77,7 @@ warn_unused_ignores = true
 [tool.pytest.ini_options]
 pythonpath = [ ".", "src" ]
 env = [ "DEFAULT_REGION = DE" ]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

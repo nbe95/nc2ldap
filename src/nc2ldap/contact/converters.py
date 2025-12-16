@@ -9,7 +9,7 @@ from phonenumbers.phonenumberutil import NumberParseException
 from vobject.base import Component
 from vobject.vcard import Address
 
-from constants import DEFAULT_REGION, LOG_LEVEL
+from nc2ldap.constants import DEFAULT_REGION, LOG_LEVEL
 
 from .contact import Contact
 
@@ -213,7 +213,7 @@ def contact_from_vcard(vcard: Component) -> Contact:
         address=(
             (None, None)
             if address is None
-            else (address.street, " ".join((address.code, address.city)))
+            else (str(address.street), f"{address.code} {address.city}")
         ),
         email=mail,
         company=org,

@@ -6,7 +6,7 @@ from typing import Set
 
 from schedule import every, repeat, run_pending
 
-from constants import (
+from nc2ldap.constants import (
     LDAP_ADMIN_PASSWORD,
     LDAP_ADMIN_USER,
     LDAP_HOST,
@@ -19,9 +19,9 @@ from constants import (
     NEXTCLOUD_USER,
     VERSION,
 )
-from contact import Contact
-from ldap import PhoneBook
-from nextcloud import AddressBook
+from nc2ldap.contact import Contact
+from nc2ldap.ldap import PhoneBook
+from nc2ldap.nextcloud import AddressBook
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ from uuid import UUID
 import pytest
 from phonenumbers import FrozenPhoneNumber, parse
 
-from contact import Contact
+from nc2ldap.contact import Contact
 
 
 def is_valid_uuid(uuid_to_test: str, version: int = 4):
