@@ -1,9 +1,0 @@
-ldap3==2.9.1
-phonenumbers==8.13.22
-python-ldap==3.4.3
-schedule==1.2.1
-simple-scheduler==1.11.12
-types-ldap3==2.9.13.14
-types-vobject==0.9.8.12
-vobject==0.9.6.1
-webdav4==0.9.8

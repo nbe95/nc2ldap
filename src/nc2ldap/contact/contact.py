@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from phonenumbers import FrozenPhoneNumber
 
-from constants import LOG_LEVEL
+from nc2ldap.constants import LOG_LEVEL
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)

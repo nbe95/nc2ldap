@@ -6,8 +6,8 @@ from typing import Generator, Set
 from vobject.base import Component, readOne
 from webdav4.client import Client
 
-from constants import LOG_LEVEL
-from contact import Contact, contact_from_vcard
+from nc2ldap.constants import LOG_LEVEL
+from nc2ldap.contact import Contact, contact_from_vcard
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)

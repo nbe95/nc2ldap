@@ -5,8 +5,8 @@ from typing import Any, Dict, Set
 
 from ldap3 import ALL, ALL_ATTRIBUTES, Connection, Server
 
-from constants import LOG_LEVEL
-from contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
+from nc2ldap.constants import LOG_LEVEL
+from nc2ldap.contact import Contact, contact_from_ldap_dict, contact_to_ldap_dict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
