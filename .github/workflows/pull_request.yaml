@@ -29,6 +29,10 @@ jobs:
   test:
     name: Test the Python code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - name: Setup pdm
