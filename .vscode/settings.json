@@ -1,6 +1,6 @@
 {
     "python.testing.pytestArgs": [
-        "nc2ldap"
+        "./src/nc2ldap"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true

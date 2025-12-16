@@ -83,7 +83,7 @@ it must contain the following data attributes:
 
 | Attribute         | Explanation                                           |
 |-------------------|-------------------------------------------------------|
-| SEARCHBASE        | The LDAP DN of the whole phonebook                    |
+| SEARCHBASE        | The LDAP DN of the whole phone book                   |
 | ATTRIB01          | Last name                                             |
 | ATTRIB02          | First name                                            |
 | ATTRIB03          | Work phone number 1                                   |
@@ -112,11 +112,6 @@ you.
 When making changes, run `pdm run lint` to automatically lint and validate and the Python code.
 Running `pdm run format` performs an auto-format and executing `pdm run test` will ensure
 functionality by running all unit tests.
-
-> :bulb: If you're not successful installing `python-ldap` and get wild errors like `command gcc
-failed`, check out [this
-article](https://www.python-ldap.org/en/python-ldap-3.3.0/installing.html#installing-from-source)
-about installing the package from source.
 
 ### Building a Docker image
 
