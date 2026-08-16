@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
-lock_version = "4.5.0"
-content_hash = "sha256:7e22b6b7bc036b87acc26c46e59ce3b66b20b376e12a05118627bb7ad2670880"
+lock_version = "4.5.1"
+content_hash = "sha256:2a5d088582a7f78de8306b4ffa6ec8e7fc1874b7c3004002ce1143e4dd27c084"
 
 [[metadata.targets]]
 requires_python = "==3.11.*"
@@ -533,6 +533,17 @@ files = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2026.3.post1"
+summary = "World timezone definitions, modern and historical"
+groups = ["default"]
+marker = "python_version == \"3.11\""
+files = [
+    {file = "pytz-2026.3.post1-py2.py3-none-any.whl", hash = "sha256:dd95840dd199baea12d9cc096a1d452caa6596a1c1e4b5f3dbd1541855d5e815"},
+    {file = "pytz-2026.3.post1.tar.gz", hash = "sha256:2211d3fcf9a797d3405cac96ac7f61d80e6a644f72a3309607282fe8a2010c5d"},
+]
+
+[[package]]
 name = "schedule"
 version = "1.2.2"
 requires_python = ">=3.7"
@@ -633,15 +644,19 @@ files = [
 
 [[package]]
 name = "vobject"
-version = "0.9.6.1"
+version = "0.9.9"
 summary = "A full-featured Python package for parsing and creating iCalendar and vCard files"
 groups = ["default"]
 marker = "python_version == \"3.11\""
 dependencies = [
-    "python-dateutil>=2.4.0",
+    "python-dateutil>=2.5.0; python_version < \"3.10\"",
+    "python-dateutil>=2.7.0; python_version >= \"3.10\"",
+    "pytz",
+    "six",
 ]
 files = [
-    {file = "vobject-0.9.6.1.tar.gz", hash = "sha256:96512aec74b90abb71f6b53898dd7fe47300cc940104c4f79148f0671f790101"},
+    {file = "vobject-0.9.9-py2.py3-none-any.whl", hash = "sha256:0fbdb982065cf4d1843a5d5950c88510041c6de026bda49c3502721de1c6ac3d"},
+    {file = "vobject-0.9.9.tar.gz", hash = "sha256:ac44e5d7e2079d84c1d52c50a615b9bec4b1ba958608c4c7fe40cbf33247b38e"},
 ]
 
 [[package]]
