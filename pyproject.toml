@@ -7,7 +7,7 @@ authors = [
 ]
 dependencies = [
     "ldap3==2.9.1",
-    "phonenumbers==8.13.22",
+    "phonenumbers==8.13.55",
     "vobject==0.9.9",
     "webdav4==0.9.8",
     "schedule>=1.2.2",
