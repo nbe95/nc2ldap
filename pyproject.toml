@@ -9,7 +9,7 @@ dependencies = [
     "ldap3==2.9.1",
     "phonenumbers==8.13.55",
     "vobject==0.9.9",
-    "webdav4==0.9.8",
+    "webdav4==0.11.0",
     "schedule>=1.2.2",
 ]
 requires-python = ">=3.11"
