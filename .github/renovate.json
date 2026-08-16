@@ -3,5 +3,8 @@
   "extends": [
     "config:recommended"
   ],
-  "dependencyDashboard": false
+  "dependencyDashboard": false,
+  "grouping": "all-dependencies",
+  "assignees": ["nbe95"],
+  "labels": ["patch"]
 }
