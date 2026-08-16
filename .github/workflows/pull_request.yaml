@@ -15,7 +15,7 @@ jobs:
     name: Lint the Python code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup pdm
         uses: pdm-project/setup-pdm@v4
         with:
@@ -34,7 +34,7 @@ jobs:
       actions: read
       checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup pdm
         uses: pdm-project/setup-pdm@v4
         with:
@@ -45,7 +45,7 @@ jobs:
       - name: Run tests
         run: pdm run pytest --junitxml=report.xml
       - name: Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: ${{ !cancelled() }}       # run this step even if previous step failed
         with:
           name: pytest test results
@@ -56,8 +56,8 @@ jobs:
     name: Validate release label and notes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: jefflinse/pr-semver-bump@v1.6.0
+      - uses: actions/checkout@v7
+      - uses: jefflinse/pr-semver-bump@v1.7.4
         name: Bump and tag new version
         with:
           mode: validate
