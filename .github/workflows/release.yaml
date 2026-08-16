@@ -19,8 +19,8 @@ jobs:
     outputs:
       version: ${{ steps.semver.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: jefflinse/pr-semver-bump@v1.6.0
+      - uses: actions/checkout@v7
+      - uses: jefflinse/pr-semver-bump@v1.7.4
         name: Bump and tag new version
         id: semver
         with:
@@ -39,16 +39,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bump-tag-version]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           file: ./Dockerfile
           context: ./
